@@ -1,0 +1,27 @@
+{
+
+	"schemaVersion": 1,
+
+	"id": "harmony", "version": "${version}", "name": "Harmony",
+	"description": "It's a mod library. It tries to make modding more easy and comfy.",
+	"license": "GNU Lesser General Public License version 3 (LGPLv3)",
+	"icon": "assets/harmony/icon.png",
+	"authors": ["Engine_Machiner"],
+
+	"contact": {
+		"issues": "https://github.com/EngineMachiner/Harmony/issues",
+		"sources": "https://github.com/EngineMachiner/Harmony"
+	},
+
+	"environment": "*",
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.19.2",
+		"java": ">=17",
+		"fabric-api": "*",
+		"fabric-language-kotlin": ">=1.9.24"
+	},
+
+	"suggests": { "another-mod": "*" }
+
+}
