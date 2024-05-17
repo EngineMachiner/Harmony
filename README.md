@@ -5,7 +5,7 @@
 
 # Harmony
 
-It's my Minecraft Fabric library for my mods. It helps me chill while I code.
+It's my Minecraft Fabric library mod for my mods. It helps me chill while I code.
 
 <div align="center">
   
