@@ -21,6 +21,12 @@ object NBT {
 
     fun id(stack: ItemStack): Int { return get(stack).getInt("ID") }
 
+    /** Checks if stacks match the same IDs. */
+    fun equals( stack1: ItemStack, stack2: ItemStack ): Boolean { return id(stack1) == id(stack2) }
+
+    /** Checks if NBTs match the same IDs. */
+    fun equals( stack: ItemStack, nbt: NbtCompound ): Boolean { return id(stack) == nbt.getInt("ID") }
+
     //fun blockPos(stack: ItemStack): BlockPos { return blockPos( get(stack) ) }
 
     private fun blockPos(nbt: NbtCompound): BlockPos {
@@ -64,24 +70,17 @@ object NBT {
 
             }
 
-
             nbt.contains("Slot") -> {
 
                 val i = nbt.getInt("Slot");      return inventory.getStack(i)
 
             }
 
-
             nbt.contains("ID") -> {
 
-                return inventoryList(inventory).find {
-
-                    has(it) && id(it) == nbt.getInt("ID")
-
-                }
+                return inventoryList(inventory).find { equals(it, nbt) }
 
             }
-
 
             else -> return null
 
