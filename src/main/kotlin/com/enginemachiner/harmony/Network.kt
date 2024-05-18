@@ -211,6 +211,12 @@ class Sender( private val id: Identifier,       private var write: Write ) {
 
     }
 
+    fun toClient(player: PlayerEntity) {
+
+        ServerPlayNetworking.send( player as ServerPlayerEntity, id, buf() )
+
+    }
+
 }
 
 class BufWrapper( val buf: PacketByteBuf ) {
