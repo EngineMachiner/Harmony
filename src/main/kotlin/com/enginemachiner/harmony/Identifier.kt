@@ -27,13 +27,13 @@ interface ModID {
 
     companion object {
 
-        private lateinit var MOD_NAME: String;      private var hasName = false
+        private lateinit var MOD_NAME: String;          private var hasName = false
 
         private const val NAME_ERROR = "[ERROR]: You can only ModID.setName() once!"
 
         internal fun name(): String { return MOD_NAME }
 
-        /** Initializes setting the mod name. */
+        /** Initializes and sets the mod name once. */
         fun init(name: String) {
 
             if (hasName) { modPrint(NAME_ERROR); return }
@@ -58,10 +58,10 @@ interface ModID {
 
             fun companion() {
 
-                val isCompanion = kClass.isCompanion;       if ( !isCompanion ) return
+                val isCompanion = kClass.isCompanion;           if ( !isCompanion ) return
 
 
-                val qualified = kClass.qualifiedName!!;     val regex = Regex("[A-Z].+")
+                val qualified = kClass.qualifiedName!!;         val regex = Regex("[A-Z].+")
 
 
                 result = regex.find(qualified)!!.value

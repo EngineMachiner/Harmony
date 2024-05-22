@@ -7,6 +7,7 @@ import java.awt.Color
 import kotlin.math.abs
 import kotlin.math.max
 
+@Environment(EnvType.CLIENT)
 fun randomColor(): Vec3f {
 
     val color = MutableList(3) { 0f }

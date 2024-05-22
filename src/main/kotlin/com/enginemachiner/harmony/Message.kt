@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.Text
+import java.lang.Exception
 
 private object Message {
 
@@ -57,11 +58,27 @@ fun warnConsole( msg: String ) {
 
 }
 
+/** Warns console and prints exception stack trace. */
+@Environment(EnvType.CLIENT)
+fun warnConsole( exception: Exception, msg: String ) {
+
+    warnUser(msg);      warnUser( exception, "message.check_console" )
+
+}
+
 /** Warns user using translations. It does not use the action bar. */
 @Environment(EnvType.CLIENT)
 fun warnUser( toParse: String ) {
 
     val msg = Message.parse(toParse);       warnPlayer(msg)
+
+}
+
+/** Warns user and prints exception stack trace. */
+@Environment(EnvType.CLIENT)
+fun warnUser( exception: Exception, toParse: String ) {
+
+    warnUser(toParse);      exception.printStackTrace()
 
 }
 

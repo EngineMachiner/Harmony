@@ -6,27 +6,31 @@ import java.io.BufferedReader
 import java.io.File
 import kotlin.reflect.KClass
 
+/** Get the system separator. */
+private fun separator(): Char { return if ( SystemUtils.IS_OS_WINDOWS ) ';' else ':' }
+
 /** Get the environment / system path if there is one. */
 fun envPath(path: String): String {
 
     if ( path.isEmpty() || path[0] != '$' ) return path
 
 
-    val envKey = Regex("\\$[A-Z]*").find(path)!!.value
+    var envKey = Regex("\\$[A-Z]*").find(path)!!.value
 
-    val subPath = path.replace( "$envKey/", "" )
-
-    val directories = System.getenv( envKey.substring(1) ) ?: return path
+    val sub = path.substringAfter("$envKey/")
 
 
-    var separator = ':';    if ( SystemUtils.IS_OS_WINDOWS ) separator = ';'
+    envKey = envKey.substringAfter("$")
 
-    val list = directories.split(separator)
+    val directories = System.getenv(envKey) ?: return path
+
+
+    val list = directories.split( separator() )
 
 
     list.forEach {
 
-        val path = it + "\\$subPath";       if ( File(path).exists() ) return path
+        val path = it + "\\$sub";       if ( File(path).exists() ) return path
 
     }
 
@@ -35,7 +39,7 @@ fun envPath(path: String): String {
 
 }
 
-/** Files that are in the honkytones folder. Like midi files. */
+/** Files that are in the mod's folder. */
 open class ModFile( private val name: String ) : File(name) {
 
     init { init() }
@@ -62,7 +66,7 @@ fun output( reader: BufferedReader ): String? {
 
     while (true) {
 
-        val line = reader.readLine() ?: break;      output += line
+        val line = reader.readLine() ?: break;          output += line
 
     }
 
@@ -100,11 +104,11 @@ abstract class ConfigFile<T : Any>(
     fun write() { writeText( GSON.toJson(data) ) }
 
 
-    open fun canCreateFile(): Boolean { return true }
+    open fun canCreate(): Boolean { return true }
 
     private fun create() {
 
-        if ( !canCreateFile() || exists() || length() > 0L ) return
+        if ( !canCreate() || exists() || length() > 0L ) return
 
         createNewFile();        setDefaults()
 
@@ -116,7 +120,7 @@ abstract class ConfigFile<T : Any>(
 
     fun keys(): Set<String> { return map.keys }
 
-    fun keys( kClass: KClass<*>): List<String> {
+    fun keys( kClass: KClass<*> ): List<String> {
 
         return map.keys.filter { kClass.isInstance( map[it] ) }
 
@@ -137,7 +141,7 @@ abstract class ConfigFile<T : Any>(
 
         private val DIRECTORY = "config/$MOD_NAME/"
 
-        fun <T: Any> json( src: Any?, kClass: KClass<T>): T {
+        fun <T: Any> json( src: Any?, kClass: KClass<T> ): T {
 
             val toJson = GSON.toJson(src)
 
@@ -145,7 +149,7 @@ abstract class ConfigFile<T : Any>(
 
         }
 
-        fun checkConfigDirectory() {
+        fun checkDirectory() {
 
             val dir = File(DIRECTORY);      if ( !dir.exists() ) dir.mkdirs()
 

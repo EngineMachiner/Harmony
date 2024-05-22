@@ -1,6 +1,9 @@
 package com.enginemachiner.harmony
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SidedInventory
@@ -88,6 +91,12 @@ open class StackInventory( val stack: ItemStack, size: Int ) : CustomInventory {
     }
 
 }
+
+@Environment(EnvType.CLIENT)
+fun inventory(): PlayerInventory { return player().inventory }
+
+@Environment(EnvType.CLIENT)
+fun stack(slot: Int): ItemStack { return inventory().getStack(slot) }
 
 fun slotIndex( slots: DefaultedList<Slot>, stack: ItemStack ): Int? {
 

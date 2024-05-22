@@ -24,8 +24,12 @@ import net.minecraft.world.World
 /** Maximum file data (bytes) that can be transferred to clients. */
 const val maxData = 32000
 
-@Environment(EnvType.CLIENT)
-fun canNetwork(): Boolean { return client().networkHandler != null }
+object Network {
+
+    @Environment(EnvType.CLIENT)
+    fun hasHandler(): Boolean { return client().networkHandler != null }
+
+}
 
 fun serverSend( server: MinecraftServer, runnable: Runnable ) {
 
@@ -146,19 +150,19 @@ class Sender( private val id: Identifier,       private var write: Write ) {
 
     constructor( id: Identifier, sender: PlayerEntity, write: Write ) : this( id, write ) {
 
-        playerSender = sender
+        this.sender = sender
 
     }
 
     internal constructor( id: Identifier, former: PacketByteBuf, sender: PlayerEntity ) : this(id) {
 
-        formerBuf = former;       playerSender = sender
+        formerBuf = former;       this.sender = sender
 
     }
 
     private var emptyWrite = false
     private var formerBuf: PacketByteBuf? = null
-    private var playerSender: PlayerEntity? = null
+    private var sender: PlayerEntity? = null
 
     private fun buf(): PacketByteBuf {
 
@@ -185,7 +189,7 @@ class Sender( private val id: Identifier,       private var write: Write ) {
 
         world.players.forEach {
 
-            val shouldSend = shouldSend( it, playerSender )
+            val shouldSend = shouldSend( it, sender )
 
             if ( !shouldSend ) return@forEach;    it as ServerPlayerEntity
 
@@ -201,7 +205,7 @@ class Sender( private val id: Identifier,       private var write: Write ) {
 
         players.forEach {
 
-            val shouldSend = shouldSend( it, playerSender )
+            val shouldSend = shouldSend( it, sender )
 
             if ( !shouldSend ) return@forEach;    it as ServerPlayerEntity
 

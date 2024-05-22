@@ -58,13 +58,11 @@ private val registry = Registry.ITEM
 
 fun modItem( kClass: KClass<*> ): Item {
 
-    val className = ModID.className(kClass)
-
-    return modItem(className)
+    val className = ModID.className(kClass);        return modItem(className)
 
 }
 
-fun modItem(id: String): Item { return registry.get( modID(id) ) }
+fun modItem(id: String): Item { val id = modID(id);     return registry.get(id) }
 
 fun isModItem(stack: ItemStack): Boolean {
 

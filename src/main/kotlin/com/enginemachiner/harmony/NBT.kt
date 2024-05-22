@@ -1,5 +1,6 @@
 package com.enginemachiner.harmony
 
+import com.enginemachiner.harmony.Network.hasHandler
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.entity.player.PlayerEntity
@@ -159,7 +160,7 @@ object NBT {
     @JvmStatic @Environment(EnvType.CLIENT)
     fun sendNBT(nbt: NbtCompound) {
 
-        if ( !canNetwork() ) return
+        if ( !hasHandler() ) return
 
 
         val sender = Sender( networkID ) { it.write(nbt) }
