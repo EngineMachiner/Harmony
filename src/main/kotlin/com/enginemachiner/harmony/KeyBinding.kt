@@ -5,7 +5,7 @@ import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
-object KeyBinding {
+object ModKeyBindings {
 
     private val CATEGORY = "category.$MOD_NAME"
 
