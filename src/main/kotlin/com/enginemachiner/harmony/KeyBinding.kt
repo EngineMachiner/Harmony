@@ -7,13 +7,13 @@ import org.lwjgl.glfw.GLFW
 
 object ModKeyBindings {
 
-    private val CATEGORY = "category.$MOD_NAME"
+    private val CATEGORY = "category.$MOD_NAME."
 
-    fun register( key: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN ): KeyBinding {
+    fun register( key: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN, category: String ): KeyBinding {
 
         val preKey = "key.$MOD_NAME."
 
-        val keyBind = KeyBinding( preKey + key, type, glfwCode, CATEGORY )
+        val keyBind = KeyBinding( preKey + key, type, glfwCode, CATEGORY + category )
 
         return KeyBindingHelper.registerKeyBinding(keyBind)
 
