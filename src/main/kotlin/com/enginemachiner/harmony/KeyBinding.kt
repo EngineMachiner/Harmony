@@ -5,17 +5,17 @@ import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
-object ModKeyBindings {
+class ModKeyBind( key: String, category: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN ) {
 
-    private val CATEGORY = "category.$MOD_NAME."
+    private val keyBind = KeyBinding( KEY + key, type, glfwCode, CATEGORY + category )
 
-    fun register( key: String, category: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN ): KeyBinding {
+    fun it(): KeyBinding { return keyBind }
 
-        val preKey = "key.$MOD_NAME."
+    fun register() { KeyBindingHelper.registerKeyBinding(keyBind) }
 
-        val keyBind = KeyBinding( preKey + key, type, glfwCode, CATEGORY + category )
+    private companion object {
 
-        return KeyBindingHelper.registerKeyBinding(keyBind)
+        val KEY = "key.$MOD_NAME.";         val CATEGORY = "category.$MOD_NAME."
 
     }
 
