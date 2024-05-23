@@ -9,7 +9,7 @@ object KeyBinding {
 
     private val CATEGORY = "category.$MOD_NAME"
 
-    private fun register( key: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN ): KeyBinding {
+    fun register( key: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN ): KeyBinding {
 
         val preKey = "key.$MOD_NAME."
 
