@@ -144,7 +144,7 @@ interface Trackable {
 interface Holder {
 
     /** Gets the stack holder as player. */
-    private fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
+    fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
 
 }
 
