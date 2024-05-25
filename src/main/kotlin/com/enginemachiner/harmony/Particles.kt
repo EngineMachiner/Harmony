@@ -18,21 +18,12 @@ object Particles {
         Registry.register( Registry.PARTICLE_TYPE, modID(path), particle )
     }
 
-    private fun spawn( world: ServerWorld, particle: ParticleEffect, count: Int, pos: Vec3d, delta: Vec3d, speed: Double ) {
+    private fun spawn( world: ServerWorld, particle: ParticleEffect, pos: Vec3d, count: Int = 1, delta: Vec3d = Vec3d.ZERO, speed: Double = 0.0 ) {
         world.spawnParticles( particle, pos.x, pos.y, pos.z, count, delta.x, delta.y, delta.z, speed )
     }
 
-    fun spawnOne( world: ServerWorld, particle: ParticleEffect, pos: Vec3d ) {
-        spawn( world, particle, 1, pos, Vec3d.ZERO, 0.0 )
-    }
-
     @Environment(EnvType.CLIENT)
-    fun spawnOne( particle: ParticleEffect, pos: Vec3d ): Particle? {
-        return spawnOne( particle, pos, Vec3d.ZERO )
-    }
-
-    @Environment(EnvType.CLIENT)
-    fun spawnOne( particle: ParticleEffect, pos: Vec3d, delta: Vec3d ): Particle? {
+    fun spawnOne( particle: ParticleEffect, pos: Vec3d, delta: Vec3d = Vec3d.ZERO ): Particle? {
 
         world() ?: return null;         val manager = client().particleManager
 

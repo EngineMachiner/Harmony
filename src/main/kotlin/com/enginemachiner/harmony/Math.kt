@@ -15,6 +15,7 @@ fun vec3d(vec3f: Vec3f): Vec3d {
 
 }
 
+/** Convert a Vec3f into a Vec3i. */
 fun vec3i(vec3f: Vec3f): Vec3i {
 
     return Vec3i( vec3f.x.toInt(), vec3f.y.toInt(), vec3f.z.toInt() )

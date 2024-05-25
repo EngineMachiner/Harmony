@@ -141,29 +141,34 @@ interface Trackable {
 
 }
 
-interface Holder {
+private interface HarmonyItem {
 
     /** Gets the stack holder as player. */
     fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
 
-}
+    /** Damage the stack. */
+    fun damage( stack: ItemStack, player: PlayerEntity, damage: Int = 1 ) {
 
-abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Holder, Trackable, ModID {
+        stack.damage(1, player) { breakEquipment(it, stack) }
 
-    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
-
-    override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) {
-        tick( stack, world, entity, slot )
     }
 
 }
 
-abstract class Item(settings: Settings) : Item(settings), Holder, Trackable, ModID {
+private interface Set : HarmonyItem, Trackable, ModID
+
+abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Set {
 
     override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
-    override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) {
-        tick( stack, world, entity, slot )
-    }
+    override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) { tick( stack, world, entity, slot ) }
+
+}
+
+abstract class Item(settings: Settings) : Item(settings), Set {
+
+    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
+
+    override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) { tick( stack, world, entity, slot ) }
 
 }
