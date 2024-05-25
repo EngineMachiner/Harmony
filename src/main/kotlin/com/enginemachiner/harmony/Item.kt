@@ -141,8 +141,14 @@ interface Trackable {
 
 }
 
+interface Holder {
 
-abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Trackable, ModID {
+    /** Gets the stack holder as player. */
+    private fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
+
+}
+
+abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Holder, Trackable, ModID {
 
     override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
@@ -152,7 +158,7 @@ abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem
 
 }
 
-abstract class Item(settings: Settings) : Item(settings), Trackable, ModID {
+abstract class Item(settings: Settings) : Item(settings), Holder, Trackable, ModID {
 
     override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
