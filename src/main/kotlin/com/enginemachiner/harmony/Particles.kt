@@ -18,7 +18,7 @@ object Particles {
         Registry.register( Registry.PARTICLE_TYPE, modID(path), particle )
     }
 
-    private fun spawn( world: ServerWorld, particle: ParticleEffect, pos: Vec3d, count: Int = 1, delta: Vec3d = Vec3d.ZERO, speed: Double = 0.0 ) {
+    fun spawn( world: ServerWorld, particle: ParticleEffect, pos: Vec3d, count: Int = 1, delta: Vec3d = Vec3d.ZERO, speed: Double = 0.0 ) {
         world.spawnParticles( particle, pos.x, pos.y, pos.z, count, delta.x, delta.y, delta.z, speed )
     }
 

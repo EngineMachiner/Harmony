@@ -149,7 +149,7 @@ private interface HarmonyItem {
     /** Damage the stack. */
     fun damage( stack: ItemStack, damage: Int = 1, entity: LivingEntity = player(stack) ) {
 
-        stack.damage( damage, entity ) { breakEquipment(entity, stack) }
+        stack.damage( damage, entity ) { breakEquipment( it, stack ) }
 
     }
 
