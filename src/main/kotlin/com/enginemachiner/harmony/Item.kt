@@ -147,9 +147,9 @@ private interface HarmonyItem {
     fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
 
     /** Damage the stack. */
-    fun damage( stack: ItemStack, player: PlayerEntity, damage: Int = 1 ) {
+    fun damage( stack: ItemStack, entity: LivingEntity = player(stack), damage: Int = 1 ) {
 
-        stack.damage(1, player) { breakEquipment(it, stack) }
+        stack.damage( damage, entity ) { breakEquipment(entity, stack) }
 
     }
 
