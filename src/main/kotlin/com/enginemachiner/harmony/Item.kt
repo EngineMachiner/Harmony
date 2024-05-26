@@ -129,7 +129,7 @@ interface Trackable {
 
     companion object {
 
-        fun trackHolder( stack: ItemStack, holder: Entity ) {
+        fun trackHolder( stack: ItemStack, holder: Entity? ) {
 
             if ( stack.holder == holder ) return
 
