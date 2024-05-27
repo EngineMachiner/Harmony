@@ -141,21 +141,17 @@ interface Trackable {
 
 }
 
-private interface HarmonyItem {
+/** Gets the stack holder as player. */
+fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
 
-    /** Gets the stack holder as player. */
-    fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
+/** Damage the stack. */
+fun damage( stack: ItemStack, damage: Int = 1, entity: LivingEntity = player(stack) ) {
 
-    /** Damage the stack. */
-    fun damage( stack: ItemStack, damage: Int = 1, entity: LivingEntity = player(stack) ) {
-
-        stack.damage( damage, entity ) { breakEquipment( it, stack ) }
-
-    }
+    stack.damage( damage, entity ) { breakEquipment( it, stack ) }
 
 }
 
-private interface Set : HarmonyItem, Trackable, ModID
+private interface Set : Trackable, ModID
 
 abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Set {
 
