@@ -18,8 +18,9 @@ fun randomColor(): Vec3f {
 
 }
 
+/** Can do color transitions or tweenings. */
 @Environment(EnvType.CLIENT)
-class ColorManager(
+class ColorTween(
 
     private val timeOn: Float = 0.5f,
     private val brightnessTime: Float = 0.5f,

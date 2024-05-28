@@ -75,7 +75,7 @@ interface SlotFactory {
 
         val slots = mutableListOf<Slot>()
 
-        if ( rows < 1 || columns < 1 ) { modPrint( INVALID_SLOTS + this ); return slots }
+        if ( rows < 1 || columns < 1 ) { modPrint( INVALID_SLOTS + this );      return slots }
 
 
         for ( i in 0 ..< rows ) { for ( j in 0 ..< columns ) {

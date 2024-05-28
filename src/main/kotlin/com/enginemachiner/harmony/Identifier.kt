@@ -12,6 +12,10 @@ val MOD_NAME = MOD_TITLE.lowercase()
 /** The mod's name to show up on chat. */
 val CHAT_MOD_TITLE = "§3 [${ MOD_NAME.uppercase() }]: §f"
 
+fun modID(id: String): Identifier { return Identifier( MOD_NAME, id ) }
+
+fun textureID(id: String): Identifier { return Identifier( MOD_NAME, "textures/$id" ) }
+
 /** IDs, identifiers and mod names helper. */
 interface ModID {
 
@@ -36,7 +40,7 @@ interface ModID {
         /** Initializes and sets the mod name once. */
         fun init(name: String) {
 
-            if (hasName) { modPrint(NAME_ERROR); return }
+            if ( hasName ) { modPrint( NAME_ERROR ); return }
 
             hasName = true;     MOD_NAME = name
 
@@ -56,19 +60,6 @@ interface ModID {
 
             }
 
-            fun companion() {
-
-                val isCompanion = kClass.isCompanion;           if ( !isCompanion ) return
-
-
-                val qualified = kClass.qualifiedName!!;         val regex = Regex("[A-Z].+")
-
-
-                result = regex.find(qualified)!!.value
-                    .replace( ".Companion", "" )
-
-            }
-
             fun block() { replace("Block"); replace("BlockEntity") }
             fun enchantment() { replace("Enchantment") }
             fun screen() { replace("ScreenHandler") }
@@ -85,7 +76,20 @@ interface ModID {
 
             }
 
-            fun replace(endsWith: String) {
+            fun companion() {
+
+                val isCompanion = kClass.isCompanion;           if ( !isCompanion ) return
+
+
+                val qualified = kClass.qualifiedName!!;         val regex = Regex("[A-Z].+")
+
+
+                result = regex.find(qualified)!!.value
+                    .replace( ".Companion", "" )
+
+            }
+
+            fun replace( endsWith: String ) {
 
                 if ( !result.endsWith(endsWith) ) return
 
@@ -98,7 +102,3 @@ interface ModID {
     }
 
 }
-
-fun modID(id: String): Identifier { return Identifier( MOD_NAME, id ) }
-
-fun textureID(id: String): Identifier { return Identifier( MOD_NAME, "textures/$id" ) }

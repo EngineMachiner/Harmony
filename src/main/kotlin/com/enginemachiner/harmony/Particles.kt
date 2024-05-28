@@ -39,6 +39,8 @@ open class SimpleParticle( clientWorld: ClientWorld, x: Double, y: Double, z: Do
 
     fun setRandomColor() { val color = randomColor();   setColor( color.x, color.y, color.z ) }
 
+    override fun getType(): ParticleTextureSheet { return ParticleTextureSheet.PARTICLE_SHEET_OPAQUE }
+
     companion object {
 
         @Environment(EnvType.CLIENT)
@@ -67,7 +69,5 @@ open class SimpleParticle( clientWorld: ClientWorld, x: Double, y: Double, z: Do
         }
 
     }
-
-    override fun getType(): ParticleTextureSheet { return ParticleTextureSheet.PARTICLE_SHEET_OPAQUE }
 
 }

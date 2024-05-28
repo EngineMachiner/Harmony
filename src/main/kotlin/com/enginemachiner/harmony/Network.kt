@@ -41,6 +41,7 @@ fun serverSend( server: MinecraftServer, runnable: Runnable ) {
 
 fun isNotSender( current: PlayerEntity, sender: PlayerEntity? ): Boolean { return current != sender }
 
+
 private typealias ReadWrite = ( sent: PacketByteBuf, toSend: BufWrapper ) -> Unit
 
 private typealias OnClient = (PacketByteBuf) -> Unit
@@ -185,7 +186,7 @@ class Sender( private val id: Identifier,       private var write: Write ) {
     /** Send packets to clients. */
     fun toClients( world: World, shouldSend: ShouldSend = ::isNotSender ) {
 
-        val buf = buf() // Just get it once. Not in the loop.
+        val buf = buf() // Get it once. Not in the loop.
 
         world.players.forEach {
 
@@ -201,7 +202,7 @@ class Sender( private val id: Identifier,       private var write: Write ) {
 
     fun toClients( players: Set<PlayerEntity>, shouldSend: ShouldSend = ::isNotSender ) {
 
-        val buf = buf() // Just get it once. Not in the loop.
+        val buf = buf() // Get it once. Not in the loop.
 
         players.forEach {
 

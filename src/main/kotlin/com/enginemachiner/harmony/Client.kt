@@ -8,5 +8,5 @@ import net.minecraft.client.MinecraftClient
 @Environment(EnvType.CLIENT)
 fun client(): MinecraftClient { return MinecraftClient.getInstance()!! }
 
-/** Checks if the current environment is on the client. */
+/** Checks if the current environment is on the client. If you have split sources, you might not need to use this at all. */
 fun isClient(): Boolean { return FabricLoaderImpl.INSTANCE.environmentType == EnvType.CLIENT }

@@ -1,6 +1,5 @@
 package com.enginemachiner.harmony
 
-import com.enginemachiner.harmony.HarmonyScreenInit.networkID
 import com.enginemachiner.harmony.HarmonyWidget.Companion.offset
 import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.api.EnvType
@@ -20,32 +19,39 @@ import net.minecraft.util.Identifier
 import java.awt.Color
 import kotlin.math.min
 
-object HarmonyScreenInit : ModID {
+@Environment(EnvType.CLIENT)
+fun currentScreen(): Screen? { return client().currentScreen }
 
-    internal val networkID = netID("update_screens")
-
-    fun networking() {
-
-        Receiver(networkID).registerEmpty {
-
-            val screen = currentScreen()
-
-            if ( screen !is ScreenRefresher ) return@registerEmpty
-
-            screen.refresh()
-
-        }
-
-    }
-
-}
+@Environment(EnvType.CLIENT)
+fun isOnScreen(): Boolean { return currentScreen() != null }
 
 @Environment(EnvType.CLIENT)
 interface ScreenRefresher {
 
     fun refresh()
 
-    fun updateHandledScreens() { Sender(networkID).toServer() }
+    /** Updates the handled screens. */
+    fun updateScreens() { Sender(netID).toServer() }
+
+    companion object : ModID {
+
+        internal val netID = netID("update_screens")
+
+        fun networking() {
+
+            Receiver(netID).registerEmpty {
+
+                val screen = currentScreen()
+
+                if ( screen !is ScreenRefresher ) return@registerEmpty
+
+                screen.refresh()
+
+            }
+
+        }
+
+    }
 
 }
 
@@ -62,17 +68,11 @@ fun registerCloseScreenReceiver() {
 
 }
 
-@Environment(EnvType.CLIENT)
-fun currentScreen(): Screen? { return client().currentScreen }
-
-@Environment(EnvType.CLIENT)
-fun isOnScreen(): Boolean { return currentScreen() != null }
-
 
 typealias SliderAction = (Slider) -> Unit
 
 @Environment(EnvType.CLIENT)
-abstract class HarmonyHandledScreen<T: ScreenHandler>(
+abstract class HarmonyScreen<T: ScreenHandler>(
 
     handler: T, playerInventory: PlayerInventory, text: Text
 
@@ -116,17 +116,15 @@ private typealias ButtonFunction = (Button) -> Unit
 @Environment(EnvType.CLIENT)
 open class Button(
 
-    x: Float, y: Float,     w: Float, h: Float,
+    x: Float, y: Float,     w: Float, h: Float,         private val messageFunction: () -> String,
 
-    private val messageFunction: () -> String,
-
-    private val init: ButtonFunction = {},    action: ButtonFunction
+    private val init: ButtonFunction = {},          action: ButtonFunction
 
 ) : ButtonWidget(
 
     offset(x, w), offset(y, h),         w.toInt(), min( h.toInt(), MAX_HEIGHT ),
 
-    Text.of( messageFunction() ),                   { it as Button; action(it) }
+    Text.of( messageFunction() ),       { it as Button; action(it) }
 
 ), HarmonyWidget {
 
@@ -134,7 +132,7 @@ open class Button(
 
         x: Float, y: Float,     w: Float, h: Float,     message: String,
 
-        init: ButtonFunction = {},    action: ButtonFunction
+        init: ButtonFunction = {},          action: ButtonFunction
 
     ) : this( x, y, w, h, { message }, init, action )
 
@@ -173,15 +171,9 @@ class CopyButton(
 
     private companion object {
 
-        val clipboard = Clipboard()
+        val clipboard = Clipboard();            val handle = client().window.handle
 
-        val handle = client().window.handle
-
-        fun action( field: TextField ) {
-
-            clipboard.setClipboard( handle, field.text )
-
-        }
+        fun action( field: TextField ) { clipboard.setClipboard( handle, field.text ) }
 
     }
 
@@ -286,19 +278,19 @@ open class RenderText( private val init: TextFunction = {} ) : HarmonyText {
 @Environment(EnvType.CLIENT)
 class FadingText( init: TextFunction ) : RenderText(init) {
 
-    private val colorManager = ColorManager()
+    private val colorTween = ColorTween()
 
     fun render( matrices: MatrixStack ) {
 
-        if ( colorManager.isDone() ) return
+        if ( colorTween.isDone() ) return
 
-        val color = colorManager.color()
+        val color = colorTween.color()
 
         super.render( matrices, color.rgb )
 
     }
 
-    fun reset() { colorManager.reset() }
+    fun reset() { colorTween.reset() }
 
 }
 

@@ -39,6 +39,21 @@ fun envPath(path: String): String {
 
 }
 
+/** Read output from a buffered reader. */
+fun output( reader: BufferedReader ): String? {
+
+    var output = reader.readLine()
+
+    while (true) {
+
+        val line = reader.readLine() ?: break;          output += line
+
+    }
+
+    return output
+
+}
+
 /** Files that are in the mod's folder. */
 open class ModFile( private val name: String ) : File(name) {
 
@@ -59,21 +74,6 @@ open class ModFile( private val name: String ) : File(name) {
 
 }
 
-/** Read output from a buffered reader. */
-fun output( reader: BufferedReader ): String? {
-
-    var output = reader.readLine()
-
-    while (true) {
-
-        val line = reader.readLine() ?: break;          output += line
-
-    }
-
-    return output
-
-}
-
 abstract class ConfigFile<T : Any>(
 
     s: String,      private val defaults: KClass<T>
@@ -83,6 +83,9 @@ abstract class ConfigFile<T : Any>(
     protected var map = mutableMapOf<String, Any>()
 
     protected var data: T? = null
+
+
+    abstract fun setDefaults()
 
 
     private fun init() { create(); read() }
@@ -115,9 +118,6 @@ abstract class ConfigFile<T : Any>(
     }
 
 
-    abstract fun setDefaults()
-
-
     fun keys(): Set<String> { return map.keys }
 
     fun keys( kClass: KClass<*> ): List<String> {
@@ -126,13 +126,14 @@ abstract class ConfigFile<T : Any>(
 
     }
 
+
+    fun toMap() { check();      map = json( data, map::class ) }
+
     fun set( key: String, value: Any ) {
 
         map[key] = value;       data = json(map, defaults);     toMap()
 
     }
-
-    fun toMap() { check();      map = json( data, map::class ) }
 
 
     companion object {

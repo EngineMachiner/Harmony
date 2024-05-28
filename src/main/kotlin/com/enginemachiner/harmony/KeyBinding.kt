@@ -5,13 +5,13 @@ import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
-class ModKeyBind( key: String, category: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN ) {
+class ModKey( key: String, category: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN ) {
 
-    private val keyBind = KeyBinding( KEY + key, type, glfwCode, CATEGORY + category )
+    fun bind(): KeyBinding { return bind }
 
-    fun it(): KeyBinding { return keyBind }
+    private val bind = KeyBinding( KEY + key, type, glfwCode, CATEGORY + category )
 
-    fun register() { KeyBindingHelper.registerKeyBinding(keyBind) }
+    fun register() { KeyBindingHelper.registerKeyBinding(bind) }
 
     private companion object {
 

@@ -12,13 +12,13 @@ import net.minecraft.world.World
 
 object NBT {
 
-    private val networkID = modID("network_nbt")
+    private val netID = modID("network_nbt")
 
     @JvmStatic
-    fun has(stack: ItemStack): Boolean { return stack.orCreateNbt.contains(MOD_NAME) }
+    fun has(stack: ItemStack): Boolean { return stack.orCreateNbt.contains( MOD_NAME ) }
 
     @JvmStatic
-    fun get(stack: ItemStack): NbtCompound { return stack.nbt!!.getCompound(MOD_NAME) }
+    fun get(stack: ItemStack): NbtCompound { return stack.nbt!!.getCompound( MOD_NAME ) }
 
     fun id(stack: ItemStack): Int { return get(stack).getInt("ID") }
 
@@ -128,7 +128,8 @@ object NBT {
 
     }
 
-    /** Stores the display temporally for it to be updated later. */
+
+    /** Stores the display temporally for it to be sent later. */
     fun saveDisplay( stack: ItemStack, next: NbtCompound ) {
 
         if ( next.contains("resetDisplay") ) return;        val former = stack.nbt!!
@@ -157,13 +158,14 @@ object NBT {
 
     }
 
+    /** Send and update NBT to the server. */
     @JvmStatic @Environment(EnvType.CLIENT)
-    fun sendNBT(nbt: NbtCompound) {
+    fun send(nbt: NbtCompound) {
 
         if ( !hasHandler() ) return
 
 
-        val sender = Sender( networkID ) { it.write(nbt) }
+        val sender = Sender(netID) { it.write(nbt) }
 
         sender.toServer()
 
@@ -171,7 +173,7 @@ object NBT {
 
     fun networking() {
 
-        Receiver(networkID).register { server, player, buf ->
+        Receiver(netID).register { server, player, buf ->
 
             val next = buf.readNbt()!!
 

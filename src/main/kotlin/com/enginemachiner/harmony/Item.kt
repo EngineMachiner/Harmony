@@ -15,7 +15,6 @@ import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
 import kotlin.reflect.KClass
 
-// Create item icon for the item group.
 private var itemGroup: ItemGroup? = null
 
 fun itemGroup(): ItemGroup? { return itemGroup }
@@ -91,7 +90,18 @@ interface StackScreen {
 }
 
 
-interface Trackable {
+/** Gets the stack holder as player. */
+fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
+
+/** Damage the stack. */
+fun damage( stack: ItemStack, damage: Int = 1, entity: LivingEntity = player(stack) ) {
+
+    stack.damage( damage, entity ) { breakEquipment( it, stack ) }
+
+}
+
+/** Adds tracking and NBT setup to items. */
+private interface HarmonyItem {
 
     fun tick( stack: ItemStack, world: World, entity: Entity, slot: Int ) {
 
@@ -141,19 +151,10 @@ interface Trackable {
 
 }
 
-/** Gets the stack holder as player. */
-fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
 
-/** Damage the stack. */
-fun damage( stack: ItemStack, damage: Int = 1, entity: LivingEntity = player(stack) ) {
+private interface Harmony : HarmonyItem, ModID
 
-    stack.damage( damage, entity ) { breakEquipment( it, stack ) }
-
-}
-
-private interface Set : Trackable, ModID
-
-abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Set {
+abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Harmony {
 
     override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
@@ -161,7 +162,7 @@ abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem
 
 }
 
-abstract class Item(settings: Settings) : Item(settings), Set {
+abstract class Item(settings: Settings) : Item(settings), Harmony {
 
     override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 

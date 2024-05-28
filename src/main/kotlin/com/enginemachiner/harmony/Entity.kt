@@ -23,7 +23,7 @@ fun addVelocity( entity: Entity, delta: Vec3d ) { entity.addVelocity( delta.x, d
 
 fun explode( e: Entity, power: Float, type: DestructionType, createFire: Boolean = false ) {
 
-    val world = e.world;    world.createExplosion( e, e.x, e.y, e.z, power, createFire, type )
+    val world = e.world;        world.createExplosion( e, e.x, e.y, e.z, power, createFire, type )
 
 }
 

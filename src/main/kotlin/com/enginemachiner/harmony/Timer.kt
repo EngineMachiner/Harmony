@@ -1,18 +1,18 @@
 package com.enginemachiner.harmony
 
-private fun threadID(): Long { return Thread.currentThread().id }
+private fun id(): Long { return Thread.currentThread().id }
 
 class Timer( private val tickLimit: Int,     private val function: () -> Unit ) {
 
-    private val id = threadID();        var remove = false
+    private val id = id();        var remove = false
 
-    private var ticks = 0;      init { timers.add(this) }
+    private var ticks = 0;        init { timers.add(this) }
 
     private fun kill() { remove = true }
 
     fun tick() {
 
-        if ( id != threadID() || remove ) { return }
+        if ( id != id() || remove ) { return }
 
         if ( ticks > tickLimit ) { function(); kill() } else ticks++
 

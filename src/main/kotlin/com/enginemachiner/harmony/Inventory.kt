@@ -12,7 +12,32 @@ import net.minecraft.screen.slot.Slot
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.Direction
 
-interface CustomInventory : SidedInventory {
+@Environment(EnvType.CLIENT)
+fun inventory(): PlayerInventory { return player().inventory }
+
+@Environment(EnvType.CLIENT)
+fun stack(slot: Int): ItemStack { return inventory().getStack(slot) }
+
+fun slotIndex( slots: DefaultedList<Slot>, stack: ItemStack ): Int? {
+
+    val stack = slots.find { it.stack == stack } ?: return null
+
+    return slots.indexOf(stack)
+
+}
+
+fun inventoryList( inventory: Inventory ): List<ItemStack> {
+
+    val list = mutableListOf<ItemStack>()
+
+    for ( i in 0 until inventory.size() ) list.add( inventory.getStack(i) )
+
+    return list
+
+}
+
+/** It's just a custom inventory. */
+interface HarmonyInventory : SidedInventory {
 
     fun items(): DefaultedList<ItemStack>
 
@@ -44,21 +69,21 @@ interface CustomInventory : SidedInventory {
 
         val result = Inventories.splitStack( items(), slot, amount )
 
-        if ( !result.isEmpty ) markDirty()
-
-        return result
+        if ( !result.isEmpty ) markDirty();         return result
 
     }
 
     override fun removeStack(slot: Int): ItemStack {
+
         return Inventories.removeStack( items(), slot )
+
     }
 
     override fun setStack( slot: Int, stack: ItemStack ) {
 
-        items()[slot] = stack
+        items()[slot] = stack;          val max = maxCountPerStack
 
-        if ( stack.count > maxCountPerStack ) stack.count = maxCountPerStack
+        if ( stack.count > max ) stack.count = max
 
     }
 
@@ -68,7 +93,7 @@ interface CustomInventory : SidedInventory {
 
 }
 
-open class StackInventory( val stack: ItemStack, size: Int ) : CustomInventory {
+open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory {
 
     private val items = DefaultedList.ofSize( size, ItemStack.EMPTY )
 
@@ -89,29 +114,5 @@ open class StackInventory( val stack: ItemStack, size: Int ) : CustomInventory {
         Inventories.writeNbt( nbt, items )
 
     }
-
-}
-
-@Environment(EnvType.CLIENT)
-fun inventory(): PlayerInventory { return player().inventory }
-
-@Environment(EnvType.CLIENT)
-fun stack(slot: Int): ItemStack { return inventory().getStack(slot) }
-
-fun slotIndex( slots: DefaultedList<Slot>, stack: ItemStack ): Int? {
-
-    val stack = slots.find { it.stack == stack } ?: return null
-
-    return slots.indexOf(stack)
-
-}
-
-fun inventoryList( inventory: Inventory ): List<ItemStack> {
-
-    val list = mutableListOf<ItemStack>()
-
-    for ( i in 0 until inventory.size() ) list.add( inventory.getStack(i) )
-
-    return list
 
 }
