@@ -125,16 +125,6 @@ object NBT {
 
     }
 
-
-    /** Stores the display temporally for it to be sent later. */
-    fun saveDisplay( stack: ItemStack, next: NbtCompound ) {
-
-        if ( next.contains("resetDisplay") ) return;        val former = stack.nbt!!
-
-        next.put( "display", former.getCompound("display") )
-
-    }
-
     private fun checkDisplay( next: NbtCompound, stack: ItemStack ) {
 
         val former = stack.nbt!!
