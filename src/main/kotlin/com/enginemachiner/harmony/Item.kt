@@ -101,7 +101,7 @@ fun damage( stack: ItemStack, damage: Int = 1, entity: LivingEntity = player(sta
 }
 
 /** Adds tracking and NBT setup to items. */
-private interface HarmonyItem {
+interface HarmonyItem {
 
     fun tick( stack: ItemStack, world: World, entity: Entity, slot: Int ) {
 
