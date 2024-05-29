@@ -90,7 +90,7 @@ interface StackScreen {
 }
 
 
-/** Gets the stack holder as player. */
+/** Gets the stack holder as a player. */
 fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
 
 /** Damage the stack. */

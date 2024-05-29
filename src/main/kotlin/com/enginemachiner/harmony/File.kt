@@ -66,11 +66,13 @@ open class ModFile( private val name: String ) : File(name) {
         if ( name.startsWith("$MOD_NAME\\") || name.isEmpty() ) return
 
 
-        warnUser("error.denied")
+        modPrint(ERROR)
 
         setExecutable(false);     setReadable(false);     setWritable(false)
 
     }
+
+    private companion object { val ERROR = Message.parse("error.denied") }
 
 }
 

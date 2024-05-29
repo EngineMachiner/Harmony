@@ -2,7 +2,7 @@ package com.enginemachiner.harmony
 
 import org.slf4j.LoggerFactory
 
-/** Verify logic or methods if they are based on vanilla behaviour, etc. */
+/** Verify logic or methods if they are based on vanilla behavior, etc. */
 annotation class BasedOn( val reason: String )
 
 private val logger = LoggerFactory.getLogger(MOD_TITLE)

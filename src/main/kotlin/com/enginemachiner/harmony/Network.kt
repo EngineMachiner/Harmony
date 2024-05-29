@@ -1,14 +1,9 @@
 package com.enginemachiner.harmony
 
 import io.netty.buffer.ByteBuf
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.PacketSender
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
@@ -22,14 +17,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 /** Maximum file data (bytes) that can be transferred to clients. */
-const val maxData = 32000
-
-object Network {
-
-    @Environment(EnvType.CLIENT)
-    fun hasHandler(): Boolean { return client().networkHandler != null }
-
-}
+const val MAX_BYTES = 32000
 
 fun serverSend( server: MinecraftServer, runnable: Runnable ) {
 
@@ -43,38 +31,28 @@ fun isNotSender( current: PlayerEntity, sender: PlayerEntity? ): Boolean { retur
 
 
 private typealias ReadWrite = ( sent: PacketByteBuf, toSend: BufWrapper ) -> Unit
-
-private typealias OnClient = (PacketByteBuf) -> Unit
+private typealias CanSend = ( player: PlayerEntity, sender: PlayerEntity? ) -> Boolean
 private typealias OnServer = ( server: MinecraftServer, sender: ServerPlayerEntity, buf: PacketByteBuf ) -> Unit
 
-private typealias ShouldSend = ( player: PlayerEntity, sender: PlayerEntity? ) -> Boolean
+abstract class AbstractReceiver( protected val id: Identifier,        private var readWrite: ReadWrite? ) {
 
-/** Networking receiver registering class. */
-class Receiver( private val id: Identifier ) {
+    protected fun buf(sent: PacketByteBuf ): PacketByteBuf {
 
-    constructor( id: Identifier, readWrite: ReadWrite ) : this(id) {
+        val readWrite = readWrite ?: return PacketByteBufs.empty()
 
-        this.readWrite = readWrite
 
-    }
+        val buf = PacketByteBufs.create()
 
-    private var readWrite = emptyWrite
-
-    @Environment(EnvType.CLIENT)
-    fun register(onClient: OnClient) {
-
-        ClientPlayNetworking.registerGlobalReceiver(id) {
-
-            _: MinecraftClient, _: ClientPlayNetworkHandler,
-            buf: PacketByteBuf, _: PacketSender ->
-
-            onClient(buf)
-
-        }
+        readWrite( sent, BufWrapper(buf) );     return buf
 
     }
 
-    fun register(onServer: OnServer) {
+}
+
+/** Networking server receiver registering class. */
+class Receiver( id: Identifier, readWrite: ReadWrite? = null ) : AbstractReceiver( id, readWrite ) {
+
+    fun register( onServer: OnServer ) {
 
         ServerPlayNetworking.registerGlobalReceiver(id) {
 
@@ -87,22 +65,11 @@ class Receiver( private val id: Identifier ) {
 
     }
 
-    private fun buf( sent: PacketByteBuf ): PacketByteBuf {
-
-        if ( emptyWrite == readWrite ) return PacketByteBufs.empty()
-
-
-        val buf = PacketByteBufs.create()
-
-        readWrite( sent, BufWrapper(buf) );     return buf
-
-    }
-
     /**
      * Registers server receiver and broadcasts to clients after it.
      * Doesn't do any server task.
      */
-    fun registerBroadcast( shouldSend: ShouldSend = ::isNotSender ) {
+    fun registerBroadcast( canSend: CanSend = ::isNotSender ) {
 
         register { server, sender, buf ->
 
@@ -115,7 +82,7 @@ class Receiver( private val id: Identifier ) {
 
                 Sender( id, next, sender ).toClients( server.overworld ) {
 
-                    player, sender -> shouldSend( player, sender )
+                    player, sender -> canSend(player, sender)
 
                 }
 
@@ -125,52 +92,25 @@ class Receiver( private val id: Identifier ) {
 
     }
 
-    /** Register receiver on both the server and client. Doesn't send any packets. */
-    fun registerEmpty( onClient: () -> Unit ) {
-
-        registerBroadcast();        if ( !isClient() ) return
-
-        register { _ -> onClient() }
-
-    }
-
-    private companion object {
-
-        val emptyWrite: ReadWrite = { _, _ ->  }
-
-    }
+    /** Register receiver on the server to broadcast. Does not send any packets.
+     * Make sure if you need to, to register on both the server and client. */
+    fun registerEmpty() { registerBroadcast() }
 
 }
 
 private typealias Write = (BufWrapper) -> Unit
 
 /** Packet sender. */
-class Sender( private val id: Identifier,       private var write: Write ) {
+abstract class AbstractSender( protected val id: Identifier,        private var write: Write? ) {
 
-    constructor( id: Identifier ) : this( id, {} ) { emptyWrite = true }
+    protected var former: PacketByteBuf? = null
 
-    constructor( id: Identifier, sender: PlayerEntity, write: Write ) : this( id, write ) {
+    protected fun buf(): PacketByteBuf {
 
-        this.sender = sender
-
-    }
-
-    internal constructor( id: Identifier, former: PacketByteBuf, sender: PlayerEntity ) : this(id) {
-
-        formerBuf = former;       this.sender = sender
-
-    }
-
-    private var emptyWrite = false
-    private var formerBuf: PacketByteBuf? = null
-    private var sender: PlayerEntity? = null
-
-    private fun buf(): PacketByteBuf {
-
-        if ( formerBuf != null ) return formerBuf!!
+        if ( former != null ) return former!!
 
 
-        if ( emptyWrite ) return PacketByteBufs.empty()
+        val write = write ?: return PacketByteBufs.empty()
 
 
         val buf = PacketByteBufs.create()
@@ -179,20 +119,35 @@ class Sender( private val id: Identifier,       private var write: Write ) {
 
     }
 
-    @Environment(EnvType.CLIENT)
-    /** Send packets to the server. */
-    fun toServer() { ClientPlayNetworking.send( id, buf() ) }
+}
+
+/** Server packet sender. */
+class Sender( id: Identifier, write: Write? = null ) : AbstractSender(id, write) {
+
+    constructor( id: Identifier, sender: PlayerEntity, write: Write? = null ) : this(id, write) {
+
+        this.sender = sender
+
+    }
+
+    internal constructor( id: Identifier, former: PacketByteBuf, sender: PlayerEntity ) : this(id) {
+
+        this.former = former;       this.sender = sender
+
+    }
+
+    private var sender: PlayerEntity? = null
 
     /** Send packets to clients. */
-    fun toClients( world: World, shouldSend: ShouldSend = ::isNotSender ) {
+    fun toClients( world: World, canSend: CanSend = ::isNotSender ) {
 
         val buf = buf() // Get it once. Not in the loop.
 
         world.players.forEach {
 
-            val shouldSend = shouldSend( it, sender )
+            val canSend = canSend(it, sender)
 
-            if ( !shouldSend ) return@forEach;    it as ServerPlayerEntity
+            if ( !canSend ) return@forEach;    it as ServerPlayerEntity
 
             ServerPlayNetworking.send( it, id, buf )
 
@@ -200,15 +155,15 @@ class Sender( private val id: Identifier,       private var write: Write ) {
 
     }
 
-    fun toClients( players: Set<PlayerEntity>, shouldSend: ShouldSend = ::isNotSender ) {
+    fun toClients( players: Set<PlayerEntity>, canSend: CanSend = ::isNotSender ) {
 
         val buf = buf() // Get it once. Not in the loop.
 
         players.forEach {
 
-            val shouldSend = shouldSend( it, sender )
+            val canSend = canSend(it, sender)
 
-            if ( !shouldSend ) return@forEach;    it as ServerPlayerEntity
+            if ( !canSend ) return@forEach;    it as ServerPlayerEntity
 
             ServerPlayNetworking.send( it, id, buf )
 
@@ -216,7 +171,7 @@ class Sender( private val id: Identifier,       private var write: Write ) {
 
     }
 
-    fun toClient(player: PlayerEntity) {
+    fun toClient( player: PlayerEntity ) {
 
         ServerPlayNetworking.send( player as ServerPlayerEntity, id, buf() )
 

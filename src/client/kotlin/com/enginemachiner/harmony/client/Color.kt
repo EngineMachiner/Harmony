@@ -1,13 +1,10 @@
-package com.enginemachiner.harmony
+package com.enginemachiner.harmony.client
 
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.util.math.Vec3f
 import java.awt.Color
 import kotlin.math.abs
 import kotlin.math.max
 
-@Environment(EnvType.CLIENT)
 fun randomColor(): Vec3f {
 
     val color = MutableList(3) { 0f }
@@ -19,7 +16,6 @@ fun randomColor(): Vec3f {
 }
 
 /** Can do color transitions or tweenings. */
-@Environment(EnvType.CLIENT)
 class ColorTween(
 
     private val timeOn: Float = 0.5f,

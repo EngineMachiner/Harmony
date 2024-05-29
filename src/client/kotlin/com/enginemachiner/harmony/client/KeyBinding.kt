@@ -1,10 +1,12 @@
-package com.enginemachiner.harmony
+package com.enginemachiner.harmony.client
 
+import com.enginemachiner.harmony.MOD_NAME
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.util.InputUtil
 import org.lwjgl.glfw.GLFW
 
+/** It registers the mod keybindings. */
 class ModKey( key: String, category: String, type: InputUtil.Type = InputUtil.Type.KEYSYM, glfwCode: Int = GLFW.GLFW_KEY_UNKNOWN ) {
 
     fun bind(): KeyBinding { return bind }

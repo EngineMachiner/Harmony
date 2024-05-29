@@ -1,8 +1,5 @@
 package com.enginemachiner.harmony
 
-import com.enginemachiner.harmony.Network.hasHandler
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
@@ -12,7 +9,7 @@ import net.minecraft.world.World
 
 object NBT {
 
-    private val netID = modID("network_nbt")
+    val netID = modID("network_nbt")
 
     @JvmStatic
     fun has(stack: ItemStack): Boolean { return stack.orCreateNbt.contains( MOD_NAME ) }
@@ -155,19 +152,6 @@ object NBT {
             stack.removeCustomName();   next.remove("resetDisplay")
 
         }
-
-    }
-
-    /** Send and update NBT to the server. */
-    @JvmStatic @Environment(EnvType.CLIENT)
-    fun send(nbt: NbtCompound) {
-
-        if ( !hasHandler() ) return
-
-
-        val sender = Sender(netID) { it.write(nbt) }
-
-        sender.toServer()
 
     }
 
