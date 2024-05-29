@@ -3,11 +3,10 @@ package com.enginemachiner.harmony.client
 import com.enginemachiner.harmony.BasedOn
 import com.enginemachiner.harmony.ModID
 import com.enginemachiner.harmony.SLOT_SIZE
+import com.enginemachiner.harmony.ScreenRefresher.netID
 import com.enginemachiner.harmony.client.HarmonyWidget.Companion.offset
 import com.enginemachiner.harmony.shorten
 import com.mojang.blaze3d.systems.RenderSystem
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawableHelper
 import net.minecraft.client.gui.screen.Screen
@@ -34,9 +33,7 @@ interface ScreenRefresher {
     /** Updates the handled screens. */
     fun updateScreens() { Sender(netID).toServer() }
 
-    companion object : ModID {
-
-        internal val netID = netID("update_screens")
+    companion object  {
 
         fun networking() {
 

@@ -11,3 +11,11 @@ fun registerCloseScreenReceiver() {
     }
 
 }
+
+object ScreenRefresher : ModID {
+
+    val netID = netID("update_screens")
+
+    fun networking() { Receiver(netID).registerEmpty() }
+
+}

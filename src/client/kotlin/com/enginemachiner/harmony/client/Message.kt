@@ -1,11 +1,6 @@
 package com.enginemachiner.harmony.client
 
 import com.enginemachiner.harmony.Message
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.text.Text
-import java.lang.Exception
 
 /** Warns user / player and displays a check console message. Mostly used when there's errors. */
 fun warnConsole( msg: String ) {
