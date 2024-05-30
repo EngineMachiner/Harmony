@@ -3,46 +3,59 @@ package com.enginemachiner.harmony
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.Text
 
-object Message {
+//** Sends messages and warnings to players and server. */
+open class Message( var message: String, var player: PlayerEntity? = null ) {
+
+    init { parse() }
 
     /** Parses translations using #. */
-    fun parse( toParse: String ): String {
+    fun parse() { message = Companion.parse(message) }
 
-        val list = toParse.split('#')
+    private fun print() {
 
-        val parsed = mutableListOf<String>()
+        val message = message.replace( regex, "" )
 
-        for ( s in list ) {
+        modPrint(message)
 
-            var s = s;      val has = Translation.has(s)
+    }
 
-            if (has) s = Translation.get(s);        parsed.add(s)
+    open fun send( actionBar: Boolean = false ) {
+
+        val player = player;        if ( player == null ) { print(); return }
+
+
+        var message = message
+
+        if ( !actionBar ) message = CHAT_MOD_TITLE + message
+
+
+        player.sendMessage( Text.of(message), actionBar )
+
+    }
+
+    companion object {
+
+        private val regex = Regex("§.")
+
+        /** Parses translations using #. */
+        fun parse(message: String): String {
+
+            val list = message.split('#')
+
+            val parsed = mutableListOf<String>()
+
+            for ( s in list ) {
+
+                var s = s;      val has = Translation.has(s)
+
+                if (has) s = Translation.get(s);        parsed.add(s)
+
+            }
+
+            return parsed.joinToString("")
 
         }
 
-        return parsed.joinToString("")
-
     }
-
-    fun sendMessage( player: PlayerEntity?, msg: String, actionBar: Boolean = false ) {
-
-        if ( player == null ) { modPrint(msg); return }
-
-        var msg = msg;      if ( !actionBar ) msg = CHAT_MOD_TITLE + msg
-
-        player.sendMessage( Text.of(msg), actionBar )
-
-    }
-
-}
-
-/** Warns the user / player through the server. */
-fun warnUser( player: PlayerEntity?, toParse: String, actionBar: Boolean = false ) {
-
-    var toParse = Message.parse(toParse)
-
-    if ( player == null ) toParse = toParse.replace( Regex("§."), "" )
-
-    Message.sendMessage( player, toParse, actionBar )
 
 }

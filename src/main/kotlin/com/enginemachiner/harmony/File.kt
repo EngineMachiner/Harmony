@@ -9,13 +9,15 @@ import kotlin.reflect.KClass
 /** Get the system separator. */
 private fun separator(): Char { return if ( SystemUtils.IS_OS_WINDOWS ) ';' else ':' }
 
+private val regex = Regex("\\$[A-Z]*")
+
 /** Get the environment / system path if there is one. */
 fun envPath(path: String): String {
 
     if ( path.isEmpty() || path[0] != '$' ) return path
 
 
-    var envKey = Regex("\\$[A-Z]*").find(path)!!.value
+    var envKey = regex.find(path)!!.value
 
     val sub = path.substringAfter("$envKey/")
 

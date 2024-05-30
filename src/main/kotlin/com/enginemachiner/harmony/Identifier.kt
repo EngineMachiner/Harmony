@@ -65,26 +65,27 @@ interface ModID {
             fun screen() { replace("ScreenHandler") }
             fun entity() { replace("Entity") }
 
+            private val symbolsRegex = Regex("([A-Z])([a-z])")
+
             fun symbols() {
 
                 result = result.replaceFirstChar { result[0].lowercase() }
 
-
-                val regex = Regex("([A-Z])([a-z])")
-
-                result = result.replace( regex, "_$1$2" ).lowercase()
+                result = result.replace( symbolsRegex, "_$1$2" ).lowercase()
 
             }
+
+            val companionRegex = Regex("[A-Z].+")
 
             fun companion() {
 
                 val isCompanion = kClass.isCompanion;           if ( !isCompanion ) return
 
 
-                val qualified = kClass.qualifiedName!!;         val regex = Regex("[A-Z].+")
+                val qualified = kClass.qualifiedName!!
 
 
-                result = regex.find(qualified)!!.value
+                result = companionRegex.find(qualified)!!.value
                     .replace( ".Companion", "" )
 
             }
