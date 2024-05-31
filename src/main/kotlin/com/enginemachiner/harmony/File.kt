@@ -68,13 +68,21 @@ open class ModFile( private val name: String ) : File(name) {
         if ( name.startsWith("$MOD_NAME\\") || name.isEmpty() ) return
 
 
-        modPrint(ERROR)
+        modPrint( warning() )
 
         setExecutable(false);     setReadable(false);     setWritable(false)
 
     }
 
-    private companion object { val ERROR = Message.parse("error.denied") }
+    private fun warning(): String {
+
+        val key = "error.denied"
+
+        if ( Translation.has(key) ) return Message.parse(key).replace( "X", name )
+
+        return "[ERROR]: Access denied for $name"
+
+    }
 
 }
 
