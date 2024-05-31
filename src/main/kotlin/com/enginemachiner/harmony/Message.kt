@@ -40,7 +40,7 @@ open class Message( var message: String, var player: PlayerEntity? = null ) {
         /** Parses translations using #. */
         fun parse(message: String): String {
 
-            val list = message.split('#')
+            val list = message.split("/@")
 
             val parsed = mutableListOf<String>()
 
