@@ -1,19 +1,8 @@
 package com.enginemachiner.harmony.client
 
-import net.minecraft.util.math.Vec3f
 import java.awt.Color
 import kotlin.math.abs
 import kotlin.math.max
-
-fun randomColor(): Vec3f {
-
-    val color = MutableList(3) { 0f }
-
-    for ( i in 0..2 ) color[i] = ( 0..255 ).random().toFloat()
-
-    return Vec3f( color[0], color[1], color[2] )
-
-}
 
 /** Can do color transitions or tweenings. */
 class ColorTween(
