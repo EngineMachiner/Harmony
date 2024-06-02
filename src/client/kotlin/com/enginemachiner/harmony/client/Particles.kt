@@ -25,7 +25,13 @@ open class SimpleParticle( clientWorld: ClientWorld, x: Double, y: Double, z: Do
 
     init { wrap() };     private fun wrap() { init() };    open fun init() {}
 
-    fun setRandomColor() { val color = randomColor();   setColor( color.x, color.y, color.z ) }
+    fun setRandomColor() {
+
+        val color = randomColor().getColorComponents(null)
+
+        setColor( color[0], color[1], color[2] )
+
+    }
 
     override fun getType(): ParticleTextureSheet { return ParticleTextureSheet.PARTICLE_SHEET_OPAQUE }
 

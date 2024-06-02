@@ -1,13 +1,13 @@
 package com.enginemachiner.harmony
 
-import net.minecraft.util.math.Vec3f
+import java.awt.Color
+import kotlin.random.Random
 
-fun randomColor(): Vec3f {
+fun randomColor(): Color {
 
-    val color = MutableList(3) { 0f }
+    val h = Random.nextInt( 100 + 1 ) * 0.01f
+    val b = Random.nextInt( 75, 100 + 1 ) * 0.01f
 
-    for ( i in 0..2 ) color[i] = ( 0..255 ).random().toFloat()
-
-    return Vec3f( color[0], color[1], color[2] )
+    return Color.getHSBColor( h, 1f, b )
 
 }
