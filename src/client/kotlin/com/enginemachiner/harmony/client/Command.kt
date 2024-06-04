@@ -19,7 +19,7 @@ object Command {
 
         private val event = ClientCommandRegistrationCallback.EVENT
 
-        fun register( onRegister: OnClientRegister) {
+        fun register( onRegister: OnClientRegister ) {
 
             event.register { dispatcher, _ ->
 
