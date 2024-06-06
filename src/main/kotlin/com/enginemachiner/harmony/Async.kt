@@ -1,5 +1,6 @@
 package com.enginemachiner.harmony
 
+import com.enginemachiner.harmony.Async.thread
 import kotlinx.coroutines.*
 
 object Async {
@@ -8,34 +9,35 @@ object Async {
 
     fun threadID(): Long { return thread().threadId() }
 
+}
 
-    val scope = CoroutineScope( Dispatchers.IO ) as Scope
+class Coroutine {
 
-    interface Scope : CoroutineScope {
+    val SCOPE = CoroutineScope( Dispatchers.IO )
 
-        private fun setThreadName( name: String? ) {
+    var name: String? = null
 
-            var name = name ?: return
+    private fun setName() {
 
-            val contains = name.contains("thread")
+        var name = name ?: return
 
-            if ( !contains ) name += " thread"
+        val contains = name.contains("thread")
 
-            thread().name = "$MOD_TITLE $name"
+        if ( !contains ) name += " thread"
 
-        }
+        thread().name = "$MOD_TITLE $name"
 
-        fun async( threadName: String, block: () -> Unit ): Deferred<Unit> {
+    }
 
-            return async { setThreadName(threadName);  block() }
+    fun async( block: () -> Unit ): Deferred<Unit> {
 
-        }
+        return SCOPE.async { setName();  block() }
 
-        fun launch( threadName: String, block: () -> Unit ) {
+    }
 
-            launch { setThreadName(threadName);  block() }
+    fun launch( block: () -> Unit ) {
 
-        }
+        SCOPE.launch { setName();  block() }
 
     }
 
