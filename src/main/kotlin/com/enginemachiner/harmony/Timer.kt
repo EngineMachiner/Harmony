@@ -1,6 +1,8 @@
 package com.enginemachiner.harmony
 
-private fun id(): Long { return Thread.currentThread().id }
+import com.enginemachiner.harmony.Async.threadID
+
+private fun id(): Long { return threadID() }
 
 class Timer( private val tickLimit: Int,     private val function: () -> Unit ) {
 
