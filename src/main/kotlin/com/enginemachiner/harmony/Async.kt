@@ -13,9 +13,10 @@ object Async {
 
 class Coroutine {
 
+    var name: String? = null
+
     val SCOPE = CoroutineScope( Dispatchers.IO )
 
-    var name: String? = null
 
     private fun setName() {
 
