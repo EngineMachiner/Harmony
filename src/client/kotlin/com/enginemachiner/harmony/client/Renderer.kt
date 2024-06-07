@@ -17,7 +17,7 @@ object Renderer {
 
         val registry: itemRegistry = BuiltinItemRendererRegistry.INSTANCE
 
-        fun register( item: ItemConvertible, renderer: itemRender ) { registry.register( item, renderer ) }
+        fun register( item: ItemConvertible, renderer: itemDynamic ) { registry.register( item, renderer ) }
 
         fun create( render: itemRender ): itemDynamic {
 
