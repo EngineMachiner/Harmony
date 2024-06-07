@@ -11,9 +11,7 @@ object Async {
 
 }
 
-class Coroutine {
-
-    var name: String? = null
+class Coroutine( var name: String? = null ) {
 
     val SCOPE = CoroutineScope( Dispatchers.IO )
 
