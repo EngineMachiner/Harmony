@@ -15,9 +15,9 @@ object NBT {
     fun has(stack: ItemStack): Boolean { return stack.orCreateNbt.contains( MOD_NAME ) }
 
     @JvmStatic
-    fun get(stack: ItemStack): NbtCompound { return stack.nbt!!.getCompound( MOD_NAME ) }
+    fun nbt(stack: ItemStack): NbtCompound { return stack.nbt!!.getCompound( MOD_NAME ) }
 
-    fun id(stack: ItemStack): Int { return get(stack).getInt("ID") }
+    fun id(stack: ItemStack): Int { return nbt(stack).getInt("ID") }
 
     /** Checks if stacks match the same IDs. */
     fun equals( stack1: ItemStack, stack2: ItemStack ): Boolean { return id(stack1) == id(stack2) }
@@ -100,7 +100,7 @@ object NBT {
 
         val holder = stack.holder;      if ( holder !is PlayerEntity ) return
 
-        val nbt = get(stack);           val uuid = holder.uuid
+        val nbt = nbt(stack);           val uuid = holder.uuid
 
 
         val b = !nbt.containsUuid(key) || nbt.getUuid(key) != uuid
@@ -115,13 +115,13 @@ object NBT {
 
         val i = holder.handItems.indexOf(stack)
 
-        putInt( get(stack), "Hand", i )
+        putInt( nbt(stack), "Hand", i )
 
     }
 
     fun trackSlot( stack: ItemStack, slot: Int ) {
 
-        putInt( get(stack), "Slot", slot )
+        putInt( nbt(stack), "Slot", slot )
 
     }
 

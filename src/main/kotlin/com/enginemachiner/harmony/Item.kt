@@ -46,7 +46,7 @@ private val equipment = arrayOf( EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND )
 
 fun breakEquipment( entity: LivingEntity, stack: ItemStack ) {
 
-    val index = NBT.get(stack).getInt("Hand")
+    val index = NBT.nbt(stack).getInt("Hand")
 
     entity.sendEquipmentBreakStatus( equipment[index] )
 
@@ -131,7 +131,7 @@ interface HarmonyItem {
     /** Clean unnecessary data if the player has the stack. */
     private fun clean(stack: ItemStack) {
 
-        val nbt = NBT.get(stack);       if ( !nbt.contains("BlockPos") ) return
+        val nbt = NBT.nbt(stack);       if ( !nbt.contains("BlockPos") ) return
 
         nbt.remove("BlockPos");     nbt.remove("Slot")
 
