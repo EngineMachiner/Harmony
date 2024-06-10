@@ -58,6 +58,14 @@ object NBT {
         if ( nbt.contains("BlockPos") ) return null;        val inventory = player.inventory
 
 
+        fun idStack(): ItemStack? {
+
+            val inventory = inventoryList(inventory)
+
+            return inventory.find { equals(it, nbt) }
+
+        }
+
         when {
 
             nbt.contains("Hand") -> {
@@ -71,16 +79,12 @@ object NBT {
             nbt.contains("Slot") -> {
 
                 val i = nbt.getInt("Slot");      val stack = inventory.getStack(i)
-                
-                if ( stack.isEmpty ) return null;       return stack
+
+                if ( stack.isEmpty ) return idStack();       return stack
 
             }
 
-            nbt.contains("ID") -> {
-
-                return inventoryList(inventory).find { equals(it, nbt) }
-
-            }
+            nbt.contains("ID") -> return idStack()
 
             else -> return null
 
