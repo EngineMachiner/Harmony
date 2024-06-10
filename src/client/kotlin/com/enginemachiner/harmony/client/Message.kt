@@ -9,6 +9,7 @@ class Message( message: String,     private val exception: Exception? = null ) :
 
     override fun send( actionBar: Boolean ) { super.send(actionBar);      exception() }
 
+    /** Warns user to check the console and sends the message after it. */
     fun console() { sendMessage("message.check_console"); send() }
 
 }

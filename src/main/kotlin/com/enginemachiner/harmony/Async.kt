@@ -34,9 +34,9 @@ class Coroutine( var name: String? = null ) {
 
     }
 
-    fun launch( block: () -> Unit ) {
+    fun launch( block: () -> Unit ): Job {
 
-        SCOPE.launch { setName();  block() }
+        return SCOPE.launch { setName();  block() }
 
     }
 
