@@ -20,10 +20,18 @@ object NBT {
     fun id(stack: ItemStack): Int { return nbt(stack).getInt("ID") }
 
     /** Checks if stacks match the same IDs. */
-    fun equals( stack1: ItemStack, stack2: ItemStack ): Boolean { return id(stack1) == id(stack2) }
+    fun equals( stack1: ItemStack, stack2: ItemStack ): Boolean {
+
+        return has(stack1) && has(stack2) && id(stack1) == id(stack2)
+
+    }
 
     /** Checks if NBTs match the same IDs. */
-    fun equals( stack: ItemStack, nbt: NbtCompound ): Boolean { return id(stack) == nbt.getInt("ID") }
+    fun equals( stack: ItemStack, nbt: NbtCompound ): Boolean {
+
+        return has(stack) && id(stack) == nbt.getInt("ID")
+
+    }
 
     //fun blockPos(stack: ItemStack): BlockPos { return blockPos( get(stack) ) }
 
