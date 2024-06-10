@@ -70,7 +70,9 @@ object NBT {
 
             nbt.contains("Slot") -> {
 
-                val i = nbt.getInt("Slot");      return inventory.getStack(i)
+                val i = nbt.getInt("Slot");      val stack = inventory.getStack(i)
+                
+                if ( stack.isEmpty ) return null;       return stack
 
             }
 
