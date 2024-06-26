@@ -119,7 +119,7 @@ interface HarmonyItem {
     fun trackTick( stack: ItemStack, slot: Int ) {}
 
 
-    fun getSetupNBT(stack: ItemStack): NbtCompound
+    fun getSetupNBT(stack: ItemStack): NbtCompound { return NbtCompound() }
 
     fun setupNBT(stack: ItemStack) {
 
