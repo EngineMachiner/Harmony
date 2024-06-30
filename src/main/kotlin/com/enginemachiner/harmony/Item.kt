@@ -13,6 +13,8 @@ import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.Hand
 import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
+import java.awt.Color
+import kotlin.random.Random
 import kotlin.reflect.KClass
 
 private var itemGroup: ItemGroup? = null
@@ -73,6 +75,20 @@ fun isModItem(stack: ItemStack): Boolean {
 fun modItemSettings( maxCount: Int = 1 ): Item.Settings {
 
     return Item.Settings().group(itemGroup).maxCount(maxCount)
+
+}
+
+
+interface ColorItem {
+
+    open fun color(): Color {
+
+        val h = Random.nextInt( 100 + 1 ) * 0.01f
+        val b = Random.nextInt( 75, 100 + 1 ) * 0.01f
+
+        return Color.getHSBColor( h, 0.35f, b )
+
+    }
 
 }
 
