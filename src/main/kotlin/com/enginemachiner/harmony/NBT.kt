@@ -33,7 +33,7 @@ object NBT {
 
     }
 
-    //fun blockPos(stack: ItemStack): BlockPos { return blockPos( get(stack) ) }
+    fun blockPos(stack: ItemStack): BlockPos { val nbt = nbt(stack);        return blockPos(nbt) }
 
     private fun blockPos(nbt: NbtCompound): BlockPos {
 
