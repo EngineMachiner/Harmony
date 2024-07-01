@@ -81,6 +81,12 @@ fun modItemSettings( maxCount: Int = 1 ): Item.Settings {
 
 interface ColorItem {
 
+    fun setColor( nbt: NbtCompound ): NbtCompound {
+
+        nbt.putInt( "Color", color().rgb );     return nbt
+
+    }
+
     open fun color(): Color {
 
         val h = Random.nextInt( 100 + 1 ) * 0.01f
