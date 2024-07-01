@@ -152,7 +152,7 @@ interface HarmonyItem {
 
 
     /** Clean unnecessary data if the player has the stack. */
-    private fun clean(stack: ItemStack) {
+    open fun clean(stack: ItemStack) {
 
         val nbt = NBT.nbt(stack);       if ( !nbt.contains("BlockPos") ) return
 
