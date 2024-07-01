@@ -1,9 +1,9 @@
 package com.enginemachiner.harmony.client
 
-import com.enginemachiner.harmony.Item
 import com.enginemachiner.harmony.NBT
 import com.enginemachiner.harmony.NBT.nbt
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry
+import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 
 interface ColorItem {
