@@ -81,6 +81,7 @@ fun modItemSettings( maxCount: Int = 1 ): Item.Settings {
 
 interface ColorItem {
 
+    /** Puts the color in the NBT. */
     fun setColor( nbt: NbtCompound ): NbtCompound {
 
         nbt.putInt( "Color", color().rgb );     return nbt
