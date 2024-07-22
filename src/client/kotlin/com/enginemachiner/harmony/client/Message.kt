@@ -3,7 +3,7 @@ package com.enginemachiner.harmony.client
 import com.enginemachiner.harmony.Message
 
 //** Sends messages and warnings to the client. */
-class Message( message: String,     private val exception: Exception? = null ) : Message( message, player() ) {
+class Message( message: String,     private val exception: Exception? = null ) : Message( message, client().player ) {
 
     private fun exception() { exception?.printStackTrace() }
 
