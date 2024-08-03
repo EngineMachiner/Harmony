@@ -10,4 +10,11 @@ object Translation {
     fun item( key: String ): String { return Text.translatable( "item.$MOD_NAME.$key" ).string }
     fun block( key: String ): String { return Text.translatable( "block.$MOD_NAME.$key" ).string }
 
+    object AdvancementKey {
+
+        fun title( key: String ): String { return "$MOD_NAME.advancements.$key.title" }
+        fun description( key: String ): String { return "$MOD_NAME.advancements.$key.description" }
+
+    }
+
 }
