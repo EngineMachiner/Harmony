@@ -3,10 +3,7 @@ package com.enginemachiner.harmony
 import net.minecraft.advancement.Advancement
 import net.minecraft.advancement.AdvancementFrame
 import net.minecraft.advancement.criterion.AbstractCriterionConditions
-import net.minecraft.advancement.criterion.Criteria
-import net.minecraft.advancement.criterion.CriterionConditions
 import net.minecraft.item.ItemStack
-import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import java.util.function.Consumer
 
