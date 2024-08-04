@@ -11,13 +11,11 @@ import java.util.function.Consumer
 /** Advancement builder for custom mod advancements in Data Generation. */
 abstract class ModAdvancement : ModID {
 
-    abstract val icon: Item
+    abstract val icon: Item;        open val parent: ModAdvancement? = null
 
-    open val name: String = lazy { className() }.value
+    open var name = "";            open var key = "";           init { init() }
 
-    open val parent: ModAdvancement? = null
-
-    open val key: String = lazy { name }.value
+    private fun init() { name = className();        key = name }
 
     open fun title(): Text { return Translation.Advancement.title(key) }
     open fun description(): Text { return Translation.Advancement.description(key) }
