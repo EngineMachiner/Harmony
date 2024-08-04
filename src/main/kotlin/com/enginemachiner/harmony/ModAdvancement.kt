@@ -20,7 +20,7 @@ abstract class ModAdvancement : ModID {
     open val parent: ModAdvancement? = null
 
 
-    abstract val key: String
+    open val key: String = lazy { name }.value
 
     open fun title(): Text { return Translation.Advancement.title(key) }
     open fun description(): Text { return Translation.Advancement.description(key) }
