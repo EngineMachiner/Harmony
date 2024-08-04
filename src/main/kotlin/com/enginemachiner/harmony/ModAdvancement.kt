@@ -11,24 +11,29 @@ import java.util.function.Consumer
 private typealias Conditions = AbstractCriterionConditions
 
 /** Advancement builder for custom mod advancements in Data Generation. */
-abstract class ModAdvancement(
+abstract class ModAdvancement {
 
-    val name: String,       open val icon: ItemStack,        val parent: ModAdvancement? = null
+    abstract val name: String;          abstract val icon: ItemStack
 
-) {
+    open val parent: ModAdvancement? = null
+
 
     abstract val titleKey: String;              abstract val descriptionKey: String
 
     open fun title(): Text { return Translation.Advancement.title( titleKey ) }
     open fun description(): Text { return Translation.Advancement.description( descriptionKey ) }
 
+
     open val frame = AdvancementFrame.TASK
     open val background = Identifier("textures/gui/advancements/backgrounds/adventure.png")
+
 
     private val toast = false;          private val announce = false
     private val hidden = false
 
+
     private var advancement: Advancement? = null
+
 
     fun build( consumer: Consumer<Advancement>, conditions: Conditions, criterion: String = name ): Advancement {
 
