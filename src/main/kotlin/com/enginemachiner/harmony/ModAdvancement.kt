@@ -12,14 +12,19 @@ private typealias Conditions = AbstractCriterionConditions
 /** Advancement builder for custom mod advancements in Data Generation. */
 open class ModAdvancement(
 
-    val name: String,               titleKey: String,
-    descriptionKey: String,         val icon: ItemStack,
-    val parent: Advancement?
+    val name: String,
+
+    titleKey: String?,           descriptionKey: String?,
+
+    val icon: ItemStack,        val parent: Advancement? = null
 
 ) {
 
-    private val title = Translation.Advancement.title(titleKey)
-    private val description = Translation.Advancement.title(descriptionKey)
+    /** Constructor used if there's a custom implementation with title and description override. */
+    constructor( name: String, icon: ItemStack, parent: Advancement ) : this( name, null, null, icon, parent )
+
+    protected open val title = Translation.Advancement.title( titleKey!! )
+    protected open val description = Translation.Advancement.description( descriptionKey!! )
 
     var frame = AdvancementFrame.TASK
 
