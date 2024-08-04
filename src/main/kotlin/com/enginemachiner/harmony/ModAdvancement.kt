@@ -25,8 +25,8 @@ abstract class ModAdvancement : ModID {
     open val frame = AdvancementFrame.TASK
     open val background = Identifier("textures/gui/advancements/backgrounds/adventure.png")
 
-    private val toast = false;          private val announce = false
-    private val hidden = false
+    open val toast = false;          open val announce = false
+    open val hidden = false
 
     private var advancement: Advancement? = null
 
