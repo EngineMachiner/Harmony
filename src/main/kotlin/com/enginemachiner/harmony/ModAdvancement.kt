@@ -18,10 +18,10 @@ abstract class ModAdvancement {
     open val parent: ModAdvancement? = null
 
 
-    abstract val titleKey: String;              abstract val descriptionKey: String
+    abstract val key: String
 
-    open fun title(): Text { return Translation.Advancement.title( titleKey ) }
-    open fun description(): Text { return Translation.Advancement.description( descriptionKey ) }
+    open fun title(): Text { return Translation.Advancement.title(key) }
+    open fun description(): Text { return Translation.Advancement.description(key) }
 
 
     open val frame = AdvancementFrame.TASK
