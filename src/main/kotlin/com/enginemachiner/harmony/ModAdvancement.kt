@@ -10,7 +10,7 @@ import java.util.function.Consumer
 private typealias Conditions = AbstractCriterionConditions
 
 /** Advancement builder for custom mod advancements in Data Generation. */
-class ModAdvancement(
+open class ModAdvancement(
 
     val name: String,               titleKey: String,
     descriptionKey: String,         val icon: ItemStack,
