@@ -3,11 +3,10 @@ package com.enginemachiner.harmony
 import net.minecraft.advancement.Advancement
 import net.minecraft.advancement.AdvancementFrame
 import net.minecraft.advancement.criterion.AbstractCriterionConditions
+import net.minecraft.item.Item
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import java.util.function.Consumer
-
-private typealias Conditions = AbstractCriterionConditions
 
 /** Advancement builder for custom mod advancements in Data Generation. */
 abstract class ModAdvancement : ModID {
@@ -31,7 +30,7 @@ abstract class ModAdvancement : ModID {
 
     private var advancement: Advancement? = null
 
-    abstract fun conditions(): Conditions
+    abstract fun conditions(): AbstractCriterionConditions
 
     fun build( consumer: Consumer<Advancement>, criterion: String = name ): Advancement {
 
