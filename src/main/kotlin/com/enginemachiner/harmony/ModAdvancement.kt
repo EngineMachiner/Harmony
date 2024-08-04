@@ -32,14 +32,14 @@ open class ModAdvancement(
     fun announce(): ModAdvancement { announce = true;     return this }
     fun hidden(): ModAdvancement { hidden = true;     return this }
 
-    fun build( consumer: Consumer<Advancement>, conditions: Conditions, name: String = this.name ) {
+    fun build( consumer: Consumer<Advancement>, conditions: Conditions, criterion: String = name ) {
 
         val builder = Advancement.Builder.create()
 
         if ( parent != null ) builder.parent(parent)
 
         builder.display( icon, title, description, background, frame, toast, announce, hidden )
-            .criterion( name, conditions ).build( consumer, "$MOD_NAME/$name" )
+            .criterion( criterion, conditions ).build( consumer, "$MOD_NAME/$name" )
 
     }
 
