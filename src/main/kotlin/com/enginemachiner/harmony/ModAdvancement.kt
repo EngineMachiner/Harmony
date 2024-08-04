@@ -11,9 +11,11 @@ import java.util.function.Consumer
 private typealias Conditions = AbstractCriterionConditions
 
 /** Advancement builder for custom mod advancements in Data Generation. */
-abstract class ModAdvancement {
+abstract class ModAdvancement : ModID {
 
-    abstract val name: String;          abstract val icon: ItemStack
+    open val name: String = lazy { className() }.value
+
+    abstract val icon: ItemStack
 
     open val parent: ModAdvancement? = null
 
