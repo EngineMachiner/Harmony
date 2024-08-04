@@ -31,7 +31,7 @@ abstract class ModAdvancement : ModID {
 
     private var advancement: Advancement? = null
 
-    abstract fun conditions(): AbstractCriterionConditions
+    abstract fun conditions(): Conditions
 
     fun build( consumer: Consumer<Advancement>, criterion: String = name ): Advancement {
 
