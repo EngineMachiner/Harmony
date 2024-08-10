@@ -3,8 +3,7 @@ package com.enginemachiner.harmony.client
 import com.enginemachiner.harmony.NBT
 import net.minecraft.item.ItemStack
 
-/** Stores the objects of networked stacks
- * and updates each NBT when searched. */
+/** Stores the objects of networked stacks and updates each NBT when searched. */
 class NetStacks {
 
     private val stacks = mutableListOf<ItemStack>()
