@@ -7,7 +7,7 @@ object Async {
 
     fun thread(): Thread { return Thread.currentThread() }
 
-    fun threadID(): Long { return thread().threadId() }
+    fun threadID(): Long { return thread().id }
 
 }
 
