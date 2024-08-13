@@ -1,6 +1,6 @@
 package com.enginemachiner.harmony
 
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.LivingEntity
@@ -10,8 +10,8 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ToolItem
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.registry.Registries
 import net.minecraft.util.Hand
-import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
 import java.awt.Color
 import kotlin.random.Random
@@ -27,7 +27,7 @@ object ItemGroup: Item( Settings() ), ModID {
 
     init {
 
-        itemGroup = FabricItemGroupBuilder.create(id)!!
+        itemGroup = FabricItemGroup.builder(id)!!
             .icon { defaultStack }.build()
 
     }
@@ -55,7 +55,7 @@ fun breakEquipment( entity: LivingEntity, stack: ItemStack ) {
 }
 
 
-private val registry = Registry.ITEM
+private val registry = Registries.ITEM
 
 fun modItem( kClass: KClass<*> ): Item {
 
@@ -74,7 +74,7 @@ fun isModItem(stack: ItemStack): Boolean {
 
 fun modItemSettings( maxCount: Int = 1 ): Item.Settings {
 
-    return Item.Settings().group(itemGroup).maxCount(maxCount)
+    return Item.Settings().maxCount(maxCount)
 
 }
 

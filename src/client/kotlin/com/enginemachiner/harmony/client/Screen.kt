@@ -107,7 +107,9 @@ open class Button(
 
     offset(x, w), offset(y, h),         w.toInt(), min( h.toInt(), MAX_HEIGHT ),
 
-    Text.of( messageFunction() ),       { it as Button; action(it) }
+    Text.of( messageFunction() ),       { it as Button; action(it) },
+
+    DEFAULT_NARRATION_SUPPLIER
 
 ), HarmonyWidget {
 

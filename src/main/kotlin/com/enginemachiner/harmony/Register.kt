@@ -1,24 +1,36 @@
 package com.enginemachiner.harmony
 
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.registry.FuelRegistry
 import net.minecraft.block.Block
 import net.minecraft.enchantment.Enchantment
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
+import net.minecraft.registry.Registries
+import net.minecraft.registry.Registry
 import net.minecraft.sound.SoundEvent
-import net.minecraft.util.registry.Registry
 import kotlin.reflect.KClass
 
 object Register {
+
+    private fun group( item: Item ) {
+
+        if ( item == ItemGroup ) return;        val group = itemGroup()
+
+        ItemGroupEvents.modifyEntriesEvent(group).register { it.add(item) }
+
+    }
 
     fun block( block: Block, settings: Item.Settings ): Block {
 
         val name = ( block as ModID ).className();      val id = modID(name)
 
 
-        val block = Registry.register( Registry.BLOCK, id, block )
+        val block = Registry.register( Registries.BLOCK, id, block )
 
-        val item = BlockItem( block, settings );    Registry.register( Registry.ITEM, id, item )
+        val item = BlockItem( block, settings );    Registry.register( Registries.ITEM, id, item )
+
+        group(item)
 
 
         return block
@@ -27,17 +39,17 @@ object Register {
 
     fun item( item: Item ): Item {
 
-        val id = ( item as ModID ).classID()
+        val id = ( item as ModID ).classID();       group(item)
 
-        return Registry.register( Registry.ITEM, id, item )
+        return Registry.register( Registries.ITEM, id, item )
 
     }
 
     fun sound( path: String ): SoundEvent {
 
-        val id = modID(path);      val event = SoundEvent(id)
+        val id = modID(path);      val event = SoundEvent.of(id)
 
-        return Registry.register( Registry.SOUND_EVENT, id, event )
+        return Registry.register( Registries.SOUND_EVENT, id, event )
 
     }
 
@@ -45,7 +57,7 @@ object Register {
 
         val path = ( enchantment as ModID ).classID()
 
-        return Registry.register( Registry.ENCHANTMENT, path, enchantment )
+        return Registry.register( Registries.ENCHANTMENT, path, enchantment )
 
     }
 
