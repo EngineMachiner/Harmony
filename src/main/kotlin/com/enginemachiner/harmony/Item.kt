@@ -1,5 +1,6 @@
 package com.enginemachiner.harmony
 
+import com.enginemachiner.harmony.ModItemGroup.itemGroup
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EquipmentSlot
@@ -11,26 +12,28 @@ import net.minecraft.item.ItemGroup
 import net.minecraft.item.ToolItem
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.Hand
+import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
 import java.awt.Color
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
-private var itemGroup: ItemGroup? = null
+interface ItemGroupData : ModID {
 
-fun itemGroup(): ItemGroup? { return itemGroup }
+    val id: Identifier
+    val itemGroup: ItemGroup;           val item: Item
 
-object ItemGroup: Item( Settings() ), ModID {
+}
 
-    private val id = modID("item_group")
+object ModItemGroup : ItemGroupData {
 
-    init {
+    override val id = modID("item_group")
 
-        itemGroup = FabricItemGroupBuilder.create(id)!!
-            .icon { defaultStack }.build()
+    override val itemGroup: ItemGroup = FabricItemGroupBuilder.create(id)
+        .icon { item.defaultStack }.build()
 
-    }
+    override val item = Item( Item.Settings() )
 
 }
 
