@@ -16,7 +16,7 @@
 	"environment": "*",
 	"depends": {
 		"fabricloader": ">=0.15.11",
-		"minecraft": "~1.19.2",
+		"minecraft": "~1.20",
 		"java": ">=17",
 		"fabric-api": "*",
 		"fabric-language-kotlin": ">=1.9.24"

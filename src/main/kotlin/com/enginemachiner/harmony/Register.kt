@@ -1,11 +1,13 @@
 package com.enginemachiner.harmony
 
+import com.enginemachiner.harmony.ModItemGroup.itemGroup
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.registry.FuelRegistry
 import net.minecraft.block.Block
 import net.minecraft.enchantment.Enchantment
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
+import net.minecraft.item.ItemGroup
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.sound.SoundEvent
@@ -15,9 +17,15 @@ object Register {
 
     private fun group( item: Item ) {
 
-        if ( item == ItemGroup ) return;        val group = itemGroup()
+        if ( item == itemGroup ) return;        val key = ModItemGroup.key
 
-        ItemGroupEvents.modifyEntriesEvent(group).register { it.add(item) }
+        ItemGroupEvents.modifyEntriesEvent(key).register { it.add(item) }
+
+    }
+
+    fun group( group: ItemGroup ): ItemGroup {
+
+        return Registry.register( Registries.ITEM_GROUP, ModItemGroup.key, group )
 
     }
 

@@ -8,12 +8,11 @@ import com.enginemachiner.harmony.client.HarmonyWidget.Companion.offset
 import com.enginemachiner.harmony.shorten
 import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gui.DrawableHelper
+import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.ingame.HandledScreen
 import net.minecraft.client.gui.widget.*
 import net.minecraft.client.util.Clipboard
-import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.slot.Slot
@@ -246,9 +245,9 @@ open class RenderText( private val init: TextFunction = {} ) : HarmonyText {
 
     }
 
-    open fun render( matrices: MatrixStack, color: Int = Color.WHITE.rgb ) {
+    open fun render( context: DrawContext, color: Int = Color.WHITE.rgb ) {
 
-        onRender(this);     renderer.draw( matrices, text, x, y, color )
+        onRender(this);     context.drawText( renderer, text, x.toInt(), y.toInt(), color, false )
 
     }
 
@@ -258,13 +257,13 @@ class FadingText( init: TextFunction ) : RenderText(init) {
 
     private val colorTween = ColorTween()
 
-    fun render( matrices: MatrixStack ) {
+    fun render( context: DrawContext ) {
 
         if ( colorTween.isDone() ) return
 
         val color = colorTween.color()
 
-        super.render( matrices, color.rgb )
+        super.render( context, color.rgb )
 
     }
 
@@ -301,10 +300,7 @@ open class Texture( val id: Identifier, private val init: (Texture) -> Unit = {}
 
     }
 
-    open fun draw(matrices: MatrixStack) {
-
-        RenderSystem.setShaderTexture( 0, id )
-
+    open fun draw( context: DrawContext ) {
 
         val x = x.toInt();      val y = y.toInt()
 
@@ -313,7 +309,7 @@ open class Texture( val id: Identifier, private val init: (Texture) -> Unit = {}
         val w2 = textureWidth.toInt();      val h2 = textureHeight.toInt()
 
 
-        DrawableHelper.drawTexture( matrices, x, y, u, v, w1, h1, w2, h2 )
+        context.drawTexture( id, x, y, u, v, w1, h1, w2, h2 )
 
         color( Color.WHITE )
 
