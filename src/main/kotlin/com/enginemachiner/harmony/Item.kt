@@ -7,30 +7,33 @@ import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.*
 import net.minecraft.item.Item
-import net.minecraft.item.ItemGroup
 import net.minecraft.item.ToolItem
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.registry.Registries
+import net.minecraft.text.Text
 import net.minecraft.util.Hand
+import net.minecraft.util.Identifier
 import net.minecraft.world.World
 import java.awt.Color
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
-private var itemGroup: ItemGroup? = null
+interface ItemGroupData : ModID {
 
-fun itemGroup(): ItemGroup? { return itemGroup }
+    val id: Identifier
+    val itemGroup: ItemGroup;           val item: Item
 
-object ItemGroup: Item( Settings() ), ModID {
+}
 
-    private val id = modID("item_group")
+object ModItemGroup : ItemGroupData {
 
-    init {
+    override val id = modID("item_group")
 
-        itemGroup = FabricItemGroup.builder(id)!!
-            .icon { defaultStack }.build()
+    override val itemGroup: ItemGroup = FabricItemGroup.builder(id)
+        .displayName( Text.of(MOD_TITLE) )
+        .icon { item.defaultStack }.build()
 
-    }
+    override val item = Item( Item.Settings() )
 
 }
 
