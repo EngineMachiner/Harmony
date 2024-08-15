@@ -1,42 +1,21 @@
 package com.enginemachiner.harmony
 
 import com.enginemachiner.harmony.ModItemGroup.itemGroup
-import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.*
 import net.minecraft.item.Item
-import net.minecraft.item.ItemGroup
+import net.minecraft.item.Item.Settings
 import net.minecraft.item.ToolItem
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.Hand
-import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
 import java.awt.Color
 import kotlin.random.Random
 import kotlin.reflect.KClass
-
-interface ItemGroupData : ModID {
-
-    val id: Identifier
-    val itemGroup: ItemGroup;           val item: Item
-
-}
-
-object ModItemGroup : ItemGroupData {
-
-    override val id = modID("item_group")
-
-    override val itemGroup: ItemGroup = FabricItemGroupBuilder.create(id)
-        .icon { item.defaultStack }.build()
-
-    override val item = Item( Item.Settings() )
-
-}
-
 
 val hands = arrayOf( Hand.MAIN_HAND, Hand.OFF_HAND )
 
@@ -75,9 +54,9 @@ fun isModItem(stack: ItemStack): Boolean {
 }
 
 
-fun modItemSettings( maxCount: Int = 1 ): Item.Settings {
+fun modItemSettings( maxCount: Int = 1 ): Settings {
 
-    return Item.Settings().group(itemGroup).maxCount(maxCount)
+    return Settings().group(itemGroup).maxCount(maxCount)
 
 }
 
