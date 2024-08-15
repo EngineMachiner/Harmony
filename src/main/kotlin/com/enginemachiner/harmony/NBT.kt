@@ -39,9 +39,9 @@ object NBT {
 
         val strings = nbt.getString("BlockPos").replace( " ", "" ).split(',')
 
-        val doubles = mutableListOf<Double>();   strings.forEach { doubles.add( it.toDouble() ) }
+        val ints = mutableListOf<Int>();   strings.forEach { ints.add( it.toInt() ) }
 
-        val blockPos = BlockPos( doubles[0], doubles[1], doubles[2] )
+        val blockPos = BlockPos( ints[0], ints[1], ints[2] )
 
         return blockPos
 
