@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack
 
 private typealias itemRegistry = BuiltinItemRendererRegistry
 private typealias itemDynamic = BuiltinItemRendererRegistry.DynamicItemRenderer
-private typealias itemRender = (ItemStack, ModelTransformation.Mode, MatrixStack, VertexConsumerProvider, Int, Int ) -> Unit
+private typealias itemRender = ( ItemStack, ModelTransformation.Mode, MatrixStack, VertexConsumerProvider, Int, Int ) -> Unit
 
 object Renderer {
 
