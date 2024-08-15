@@ -1,5 +1,6 @@
 package com.enginemachiner.harmony
 
+import com.enginemachiner.harmony.ModItemGroup.itemGroup
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.registry.FuelRegistry
 import net.minecraft.block.Block
@@ -15,9 +16,9 @@ object Register {
 
     private fun group( item: Item ) {
 
-        if ( item == ItemGroup ) return;        val group = itemGroup()
+        if ( item == ModItemGroup.item ) return
 
-        ItemGroupEvents.modifyEntriesEvent(group).register { it.add(item) }
+        ItemGroupEvents.modifyEntriesEvent(itemGroup).register { it.add(item) }
 
     }
 
