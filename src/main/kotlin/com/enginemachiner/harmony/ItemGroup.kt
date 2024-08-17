@@ -26,6 +26,10 @@ object ModItemGroup : ItemGroupData {
 
     override val item = ItemGroupItem()
 
-    class ItemGroupItem : Item( Settings() )
+    class ItemGroupItem : Item( Settings() ) {
+
+        override fun className(): String { return "item_group" }
+
+    }
 
 }
