@@ -1,8 +1,9 @@
 package com.enginemachiner.harmony
 
 import net.minecraft.advancement.Advancement
+import net.minecraft.advancement.AdvancementCriterion
+import net.minecraft.advancement.AdvancementEntry
 import net.minecraft.advancement.AdvancementFrame
-import net.minecraft.advancement.criterion.AbstractCriterionConditions
 import net.minecraft.item.Item
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
@@ -26,11 +27,11 @@ abstract class ModAdvancement : ModID {
     open val toast = false;          open val announce = false
     open val hidden = false
 
-    private var advancement: Advancement? = null
+    private var advancement: AdvancementEntry? = null
 
-    abstract fun conditions(): AbstractCriterionConditions
+    abstract fun conditions(): AdvancementCriterion<*>
 
-    fun build( consumer: Consumer<Advancement>, criterion: String = name ): Advancement {
+    fun build( consumer: Consumer<AdvancementEntry>, criterion: String = name ): AdvancementEntry {
 
         val advancement = Advancement.Builder.create()
             .display( icon, title(), description(), background, frame, toast, announce, hidden )
