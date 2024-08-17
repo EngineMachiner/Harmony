@@ -202,6 +202,21 @@ abstract class Slider(
 }
 
 
+open class Checkbox(
+
+    x: Float, y: Float,     w: Float, h: Float,
+
+    message: String,        checked: Boolean,         private val init: (Checkbox) -> Unit = {}
+
+) : CheckboxWidget( offset(x, w), offset(y, h), w.toInt(), min( h.toInt(), MAX_HEIGHT ), Text.of(message), checked ), HarmonyWidget {
+
+    init { init() };        private fun init() { init(this) };          fun check() { super.onPress() }
+
+    private companion object { const val MAX_HEIGHT = 20 }
+
+}
+
+
 private typealias TextFunction = (RenderText) -> Unit
 
 open class RenderText( private val init: TextFunction = {} ) : HarmonyText {
