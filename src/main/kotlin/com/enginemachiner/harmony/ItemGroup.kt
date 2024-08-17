@@ -24,6 +24,8 @@ object ModItemGroup : ItemGroupData {
         .displayName( Text.of(MOD_TITLE) )
         .icon { item.defaultStack }.build()
 
-    override val item = object : Item( Settings() ) {}
+    override val item = ItemGroupItem()
+
+    class ItemGroupItem : Item( Settings() )
 
 }
