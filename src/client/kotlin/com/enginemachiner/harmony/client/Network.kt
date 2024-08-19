@@ -1,14 +1,8 @@
 package com.enginemachiner.harmony.client
 
-import com.enginemachiner.harmony.AbstractReceiver
-import com.enginemachiner.harmony.AbstractSender
-import com.enginemachiner.harmony.BufWrapper
+import com.enginemachiner.harmony.PayloadCompanion
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-import net.fabricmc.fabric.api.networking.v1.PacketSender
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.network.ClientPlayNetworkHandler
-import net.minecraft.network.PacketByteBuf
-import net.minecraft.util.Identifier
+import net.minecraft.network.packet.CustomPayload
 
 object Network {
 
@@ -16,21 +10,16 @@ object Network {
 
 }
 
-private typealias ReadWrite = ( sent: PacketByteBuf, toSend: BufWrapper ) -> Unit
-
-private typealias OnClient = (PacketByteBuf) -> Unit
+private typealias OnClient = ( payload: CustomPayload, context: ClientPlayNetworking.Context ) -> Unit
 
 /** Networking client receiver registering class. */
-class Receiver( id: Identifier, readWrite: ReadWrite? = null ) : AbstractReceiver( id, readWrite ) {
+class Receiver( private val payload: PayloadCompanion ) {
 
     fun register( onClient: OnClient ) {
 
-        ClientPlayNetworking.registerGlobalReceiver(id) {
+        ClientPlayNetworking.registerGlobalReceiver( payload.id ) {
 
-                _: MinecraftClient, _: ClientPlayNetworkHandler,
-                buf: PacketByteBuf, _: PacketSender ->
-
-            onClient(buf)
+            payload, context -> onClient(payload, context)
 
         }
 
@@ -38,16 +27,14 @@ class Receiver( id: Identifier, readWrite: ReadWrite? = null ) : AbstractReceive
 
     /** Register receiver on the client. Does not send any packets.
      * Make sure if you need to, to register on both the server and client. */
-    fun registerEmpty( onClient: () -> Unit ) { register { _ -> onClient() } }
+    fun registerEmpty( onClient: () -> Unit ) { register { _, _ -> onClient() } }
 
 }
 
-private typealias Write = (BufWrapper) -> Unit
-
 /** Client packet sender. */
-class Sender( id: Identifier, write: Write? = null ) : AbstractSender(id, write) {
+class Sender( private val payload: CustomPayload ) {
 
     /** Send packets to the server. */
-    fun toServer() { ClientPlayNetworking.send( id, buf() ) }
+    fun toServer() { ClientPlayNetworking.send(payload) }
 
 }

@@ -1,7 +1,9 @@
 package com.enginemachiner.harmony.client
 
-import com.enginemachiner.harmony.NBT.netID
+import com.enginemachiner.harmony.NBT
 import com.enginemachiner.harmony.client.Network.hasHandler
+import net.minecraft.component.DataComponentTypes
+import net.minecraft.component.DataComponentTypes.CUSTOM_NAME
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 
@@ -13,18 +15,18 @@ object NBT {
         if ( !hasHandler() ) return
 
 
-        val sender = Sender(netID) { it.write(nbt) }
+        val payload = NBT.StackPayload(nbt)
 
-        sender.toServer()
+        Sender(payload).toServer()
 
     }
 
     /** Stores the display temporally for it to be sent later. */
-    fun saveDisplay(stack: ItemStack, next: NbtCompound ) {
+    fun saveDisplay( stack: ItemStack, next: NbtCompound ) {
 
-        if ( next.contains("resetDisplay") ) return;        val former = stack.nbt!!
+        if ( next.contains("resetDisplay") ) return;        val former = stack.get(CUSTOM_NAME)!!
 
-        next.put( "display", former.getCompound("display") )
+        next.putString( "display", former.string )
 
     }
 

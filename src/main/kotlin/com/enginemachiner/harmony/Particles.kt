@@ -1,7 +1,7 @@
 package com.enginemachiner.harmony
 
-import net.minecraft.particle.DefaultParticleType
 import net.minecraft.particle.ParticleEffect
+import net.minecraft.particle.ParticleType
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.server.world.ServerWorld
@@ -11,7 +11,7 @@ object Particles {
 
     const val MIN_DISTANCE = 36.0
 
-    fun register( path: String, particle: DefaultParticleType ) {
+    fun register( path: String, particle: ParticleType<*> ) {
         Registry.register( Registries.PARTICLE_TYPE, modID(path), particle )
     }
 

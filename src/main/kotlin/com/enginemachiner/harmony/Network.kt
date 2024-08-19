@@ -1,19 +1,15 @@
 package com.enginemachiner.harmony
 
 import io.netty.buffer.ByteBuf
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
-import net.fabricmc.fabric.api.networking.v1.PacketSender
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.network.PacketByteBuf
+import net.minecraft.network.RegistryByteBuf
+import net.minecraft.network.codec.PacketCodec
+import net.minecraft.network.packet.CustomPayload
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.ServerTask
-import net.minecraft.server.network.ServerPlayNetworkHandler
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.util.Identifier
-import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 /** Maximum file data (bytes) that can be transferred to clients. */
@@ -29,39 +25,15 @@ fun serverSend( server: MinecraftServer, runnable: Runnable ) {
 
 fun isNotSender( current: PlayerEntity, sender: PlayerEntity? ): Boolean { return current != sender }
 
-
-private typealias ReadWrite = ( sent: PacketByteBuf, toSend: BufWrapper ) -> Unit
 private typealias CanSend = ( player: PlayerEntity, sender: PlayerEntity? ) -> Boolean
-private typealias OnServer = ( server: MinecraftServer, sender: ServerPlayerEntity, buf: PacketByteBuf ) -> Unit
-
-abstract class AbstractReceiver( protected val id: Identifier,        private var readWrite: ReadWrite? ) {
-
-    protected fun buf(sent: PacketByteBuf ): PacketByteBuf {
-
-        val readWrite = readWrite ?: return PacketByteBufs.empty()
-
-
-        val buf = PacketByteBufs.create()
-
-        readWrite( sent, BufWrapper(buf) );     return buf
-
-    }
-
-}
+private typealias OnServer = ( payload: CustomPayload, context: ServerPlayNetworking.Context ) -> Unit
 
 /** Networking server receiver registering class. */
-class Receiver( id: Identifier, readWrite: ReadWrite? = null ) : AbstractReceiver( id, readWrite ) {
+class Receiver( private val payload: PayloadCompanion ) {
 
     fun register( onServer: OnServer ) {
 
-        ServerPlayNetworking.registerGlobalReceiver(id) {
-
-            server: MinecraftServer, sender: ServerPlayerEntity,
-            _: ServerPlayNetworkHandler, buf: PacketByteBuf, _: PacketSender ->
-
-            onServer( server, sender, buf )
-
-        }
+        ServerPlayNetworking.registerGlobalReceiver( payload.id, onServer )
 
     }
 
@@ -71,16 +43,13 @@ class Receiver( id: Identifier, readWrite: ReadWrite? = null ) : AbstractReceive
      */
     fun registerBroadcast( canSend: CanSend = ::isNotSender ) {
 
-        register { server, sender, buf ->
+        register { payload, context ->
 
-            // Bufs needs to be read and written.
-
-            val next = buf(buf)
-
+            val sender = context.player();          val server = sender.server
 
             serverSend(server) {
 
-                Sender( id, next, sender ).toClients( server.overworld ) {
+                Sender( sender, payload ).toClients( server.overworld ) {
 
                     player, sender -> canSend(player, sender)
 
@@ -98,66 +67,21 @@ class Receiver( id: Identifier, readWrite: ReadWrite? = null ) : AbstractReceive
 
 }
 
-private typealias Write = (BufWrapper) -> Unit
-
-/** Packet sender. */
-abstract class AbstractSender( protected val id: Identifier,        private var write: Write? ) {
-
-    protected var former: PacketByteBuf? = null
-
-    protected fun buf(): PacketByteBuf {
-
-        if ( former != null ) return former!!
-
-
-        val write = write ?: return PacketByteBufs.empty()
-
-
-        val buf = PacketByteBufs.create()
-
-        write( BufWrapper(buf) );         return buf
-
-    }
-
-}
-
 /** Server packet sender. */
-class Sender( id: Identifier, write: Write? = null ) : AbstractSender(id, write) {
+class Sender( private val payload: CustomPayload ) {
 
-    constructor( id: Identifier, sender: PlayerEntity, write: Write? = null ) : this(id, write) {
-
-        this.sender = sender
-
-    }
-
-    internal constructor( id: Identifier, former: PacketByteBuf, sender: PlayerEntity ) : this(id) {
-
-        this.former = former;       this.sender = sender
-
-    }
+    constructor( sender: PlayerEntity, payload: CustomPayload ) : this(payload) { this.sender = sender }
 
     private var sender: PlayerEntity? = null
 
     /** Send packets to clients. */
     fun toClients( world: World, canSend: CanSend = ::isNotSender ) {
 
-        val buf = buf() // Get it once. Not in the loop.
-
-        world.players.forEach {
-
-            val canSend = canSend(it, sender)
-
-            if ( !canSend ) return@forEach;    it as ServerPlayerEntity
-
-            ServerPlayNetworking.send( it, id, buf )
-
-        }
+        toClients( world.players.toSet(), canSend )
 
     }
 
     fun toClients( players: Set<PlayerEntity>, canSend: CanSend = ::isNotSender ) {
-
-        val buf = buf() // Get it once. Not in the loop.
 
         players.forEach {
 
@@ -165,7 +89,7 @@ class Sender( id: Identifier, write: Write? = null ) : AbstractSender(id, write)
 
             if ( !canSend ) return@forEach;    it as ServerPlayerEntity
 
-            ServerPlayNetworking.send( it, id, buf )
+            ServerPlayNetworking.send( it, payload )
 
         }
 
@@ -173,21 +97,24 @@ class Sender( id: Identifier, write: Write? = null ) : AbstractSender(id, write)
 
     fun toClient( player: PlayerEntity ) {
 
-        ServerPlayNetworking.send( player as ServerPlayerEntity, id, buf() )
+        ServerPlayNetworking.send( player as ServerPlayerEntity, payload )
 
     }
 
 }
 
-class BufWrapper( val buf: PacketByteBuf ) {
+typealias Registry = PayloadTypeRegistry<RegistryByteBuf>
 
-    fun write(a: Boolean): BufWrapper { buf.writeBoolean(a); return this }
-    fun write(a: String): BufWrapper { buf.writeString(a); return this }
-    fun write(a: Float): BufWrapper { buf.writeFloat(a); return this }
-    fun write(a: Int): BufWrapper { buf.writeInt(a); return this }
-    fun write( a: ItemStack? ): BufWrapper { buf.writeItemStack(a); return this }
-    fun write( a: BlockPos ): BufWrapper { buf.writeBlockPos(a); return this }
-    fun write( a: NbtCompound ): BufWrapper { buf.writeNbt(a); return this }
-    fun write( a: ByteBuf ): BufWrapper { buf.writeBytes(a); return this }
+abstract class Payload : CustomPayload {
+
+    val playS2C: Registry = PayloadTypeRegistry.playS2C()
+    val playC2S: Registry = PayloadTypeRegistry.playC2S()
+
+}
+
+abstract class PayloadCompanion {
+
+    abstract val id: CustomPayload.Id<*>
+    abstract val codec: PacketCodec<ByteBuf, *>
 
 }

@@ -1,17 +1,16 @@
 package com.enginemachiner.harmony.client
 
-import com.enginemachiner.harmony.BasedOn
-import com.enginemachiner.harmony.ModID
-import com.enginemachiner.harmony.SLOT_SIZE
-import com.enginemachiner.harmony.ScreenRefresher.netID
+import com.enginemachiner.harmony.*
 import com.enginemachiner.harmony.client.HarmonyWidget.Companion.offset
-import com.enginemachiner.harmony.shorten
 import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.ingame.HandledScreen
-import net.minecraft.client.gui.widget.*
+import net.minecraft.client.gui.widget.ButtonWidget
+import net.minecraft.client.gui.widget.ClickableWidget
+import net.minecraft.client.gui.widget.SliderWidget
+import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.client.util.Clipboard
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.screen.ScreenHandler
@@ -30,13 +29,13 @@ interface ScreenRefresher {
     fun refresh()
 
     /** Updates the handled screens. */
-    fun updateScreens() { Sender(netID).toServer() }
+    fun updateScreens() { Sender( UpdateScreenPayload() ).toServer() }
 
     companion object  {
 
         fun networking() {
 
-            Receiver(netID).registerEmpty {
+            Receiver( UpdateScreenPayload ).registerEmpty {
 
                 val screen = currentScreen()
 

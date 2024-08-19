@@ -1,5 +1,7 @@
 package com.enginemachiner.harmony
 
+import com.enginemachiner.harmony.NBT.customData
+import com.enginemachiner.harmony.NBT.equipment
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.LivingEntity
@@ -15,22 +17,13 @@ import java.awt.Color
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
+val equipment = arrayOf( EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND )
+
 val hands = arrayOf( Hand.MAIN_HAND, Hand.OFF_HAND )
 
 fun handItem( player: PlayerEntity, kClass: KClass<*> ): ItemStack {
 
     return player.handItems.find { kClass.isInstance( it.item ) }!!
-
-}
-
-
-private val equipment = arrayOf( EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND )
-
-fun breakEquipment( entity: LivingEntity, stack: ItemStack ) {
-
-    val index = NBT.nbt(stack).getInt("Hand")
-
-    entity.sendEquipmentBreakStatus( equipment[index] )
 
 }
 
@@ -99,7 +92,7 @@ fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEnti
 /** Damage the stack. */
 fun damage( stack: ItemStack, damage: Int = 1, entity: LivingEntity = player(stack) ) {
 
-    stack.damage( damage, entity ) { breakEquipment( it, stack ) }
+    stack.damage( damage, entity, equipment(stack) )
 
 }
 
@@ -126,7 +119,7 @@ interface HarmonyItem {
 
     fun setupNBT(stack: ItemStack) {
 
-        val nbt = stack.nbt!!;      nbt.put( MOD_NAME, getSetupNBT(stack) )
+        val nbt = customData(stack);      nbt.put( MOD_NAME, getSetupNBT(stack) )
 
     }
 
@@ -159,7 +152,7 @@ private interface Harmony : HarmonyItem, ModID
 
 abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Harmony {
 
-    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
+    override fun allowComponentsUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
     override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) { tick( stack, world, entity, slot ) }
 
@@ -167,7 +160,7 @@ abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem
 
 abstract class Item(settings: Settings) : Item(settings), Harmony {
 
-    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
+    override fun allowComponentsUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
     override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) { tick( stack, world, entity, slot ) }
 

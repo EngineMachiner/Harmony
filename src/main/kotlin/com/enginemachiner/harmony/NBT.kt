@@ -1,9 +1,17 @@
 package com.enginemachiner.harmony
 
+import io.netty.buffer.ByteBuf
+import net.minecraft.component.DataComponentTypes.CUSTOM_DATA
+import net.minecraft.component.DataComponentTypes.CUSTOM_NAME
+import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.network.codec.PacketCodec
+import net.minecraft.network.codec.PacketCodecs
+import net.minecraft.network.packet.CustomPayload
+import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
@@ -12,10 +20,13 @@ object NBT {
     val netID = modID("network_nbt")
 
     @JvmStatic
-    fun has(stack: ItemStack): Boolean { return stack.orCreateNbt.contains( MOD_NAME ) }
+    fun customData(stack: ItemStack): NbtCompound { return stack.get(CUSTOM_DATA)!!.copyNbt()!! }
 
     @JvmStatic
-    fun nbt(stack: ItemStack): NbtCompound { return stack.nbt!!.getCompound( MOD_NAME ) }
+    fun has(stack: ItemStack): Boolean { return customData(stack).contains(MOD_NAME) }
+
+    @JvmStatic
+    fun nbt(stack: ItemStack): NbtCompound { return customData(stack).getCompound(MOD_NAME) }
 
     fun id(stack: ItemStack): Int { return nbt(stack).getInt("ID") }
 
@@ -139,21 +150,42 @@ object NBT {
 
     }
 
-    private fun checkDisplay( next: NbtCompound, stack: ItemStack ) {
+    fun equipment(stack: ItemStack): EquipmentSlot {
 
-        val former = stack.nbt!!
+        val index = nbt(stack).getInt("Hand")
+
+        return equipment[index]
+
+    }
+
+    private fun checkDisplay( next: NbtCompound, stack: ItemStack ) {
 
         if ( next.contains("display") ) {
 
 
-            val display = next.getCompound("display")
+            val display = next.getString("display")
 
-            former.put( "display", display );      next.remove("display")
+            stack.set( CUSTOM_NAME, Text.of(display) );      next.remove("display")
 
 
         } else if ( next.contains("resetDisplay") ) {
 
-            stack.removeCustomName();   next.remove("resetDisplay")
+            stack.remove(CUSTOM_NAME);   next.remove("resetDisplay")
+
+        }
+
+    }
+
+    data class StackPayload( val data: NbtCompound ) : Payload() {
+
+        override fun getId(): CustomPayload.Id<StackPayload> { return Companion.id }
+
+        fun register() { playS2C.register( id, codec ) }
+
+        companion object : PayloadCompanion() {
+
+            override val id = CustomPayload.Id<StackPayload>(netID)
+            override val codec: PacketCodec<ByteBuf, StackPayload> = PacketCodec.tuple( PacketCodecs.NBT_COMPOUND, StackPayload::data, ::StackPayload )
 
         }
 
@@ -161,15 +193,17 @@ object NBT {
 
     fun networking() {
 
-        Receiver(netID).register { server, player, buf ->
+        Receiver( StackPayload ).register { payload, context ->
 
-            val next = buf.readNbt()!!
+            val player = context.player();          val server = player.server
 
             serverSend(server) {
 
+                payload as StackPayload;        val next = payload.data
+
                 val stack = getStack( player, next ) ?: return@serverSend
 
-                val former = stack.nbt!!;      checkDisplay( next, stack )
+                val former = customData(stack);      checkDisplay( next, stack )
 
                 former.put( MOD_NAME, next )
 

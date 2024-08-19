@@ -1,10 +1,13 @@
 package com.enginemachiner.harmony
 
+import com.enginemachiner.harmony.NBT.customData
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
+import net.minecraft.registry.DynamicRegistryManager
+import net.minecraft.registry.Registries
 import net.minecraft.screen.slot.Slot
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.Direction
@@ -90,9 +93,9 @@ open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory 
 
     init {
 
-        val nbt = stack.getSubNbt("Items")
+        val nbt = customData(stack).getCompound("Items")
 
-        if ( nbt != null ) Inventories.readNbt( nbt, items )
+        if ( nbt != null ) Inventories.readNbt( nbt, items, wrapper )
 
     }
 
@@ -100,9 +103,15 @@ open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory 
 
     override fun markDirty() {
 
-        val nbt = stack.getOrCreateSubNbt("Items")
+        val nbt = customData(stack).getCompound("Items")
 
-        Inventories.writeNbt( nbt, items )
+        Inventories.writeNbt( nbt, items, wrapper )
+
+    }
+
+    private companion object {
+
+        val wrapper: DynamicRegistryManager.Immutable = DynamicRegistryManager.of( Registries.REGISTRIES )
 
     }
 

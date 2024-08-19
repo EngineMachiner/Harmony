@@ -28,7 +28,7 @@ class NetStacks {
     /** Update the NBT. */
     private fun update( netStack: ItemStack, stack: ItemStack? ): Boolean {
 
-        stack ?: return false;          stack.nbt = netStack.nbt
+        stack ?: return false;          stack.applyComponentsFrom( netStack.components )
 
         return true
 
