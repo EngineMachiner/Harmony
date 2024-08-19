@@ -141,17 +141,7 @@ class Sender( id: Identifier, write: Write? = null ) : AbstractSender(id, write)
     /** Send packets to clients. */
     fun toClients( world: World, canSend: CanSend = ::isNotSender ) {
 
-        val buf = buf() // Get it once. Not in the loop.
-
-        world.players.forEach {
-
-            val canSend = canSend(it, sender)
-
-            if ( !canSend ) return@forEach;    it as ServerPlayerEntity
-
-            ServerPlayNetworking.send( it, id, buf )
-
-        }
+        toClients( world.players.toSet(), canSend )
 
     }
 
