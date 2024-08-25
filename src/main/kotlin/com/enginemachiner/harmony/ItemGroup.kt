@@ -16,7 +16,7 @@ object ModItemGroup : ItemGroupData {
     override val id = modID("item_group")
 
     override val itemGroup: ItemGroup = FabricItemGroupBuilder.create(id)
-        .icon { item.defaultStack }.build()
+        .icon { item.stackForRender }.build()
 
     override val item = ItemGroupItem()
 
