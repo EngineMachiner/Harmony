@@ -30,7 +30,9 @@ abstract class HarmonyScreenHandler( type: ScreenHandlerType<*>, syncID: Int ) :
 
     }
 
-    fun canPickUp( onSlots: Boolean, condition: Condition ): Boolean {
+    fun canPickUp( playerInventory: PlayerInventory, onSlots: Boolean, condition: Condition ): Boolean {
+
+        val cursorStack = playerInventory.cursorStack
 
         val cursor = condition(cursorStack) || cursorStack.isEmpty
 
