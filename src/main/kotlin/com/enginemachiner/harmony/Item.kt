@@ -9,7 +9,7 @@ import net.minecraft.item.*
 import net.minecraft.item.Item
 import net.minecraft.item.Item.Settings
 import net.minecraft.item.ToolItem
-import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.Hand
 import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
@@ -64,7 +64,7 @@ fun modItemSettings( maxCount: Int = 1 ): Settings {
 interface ColorItem {
 
     /** Puts the color in the NBT. */
-    fun setColor( nbt: NbtCompound ): NbtCompound {
+    fun setColor( nbt: CompoundTag ): CompoundTag {
 
         nbt.putInt( "Color", color().rgb );     return nbt
 
@@ -124,7 +124,7 @@ interface HarmonyItem {
     fun trackTick( stack: ItemStack, slot: Int ) {}
 
 
-    open fun getSetupNBT( stack: ItemStack ): NbtCompound { return NbtCompound() }
+    open fun getSetupNBT( stack: ItemStack ): CompoundTag { return CompoundTag() }
 
     fun setupNBT(stack: ItemStack) {
 

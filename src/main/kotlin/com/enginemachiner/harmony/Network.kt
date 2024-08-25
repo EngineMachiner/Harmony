@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.ServerTask
@@ -177,7 +177,7 @@ class BufWrapper( val buf: PacketByteBuf ) {
     fun write(a: Int): BufWrapper { buf.writeInt(a); return this }
     fun write( a: ItemStack? ): BufWrapper { buf.writeItemStack(a); return this }
     fun write( a: BlockPos ): BufWrapper { buf.writeBlockPos(a); return this }
-    fun write( a: NbtCompound ): BufWrapper { buf.writeNbt(a); return this }
+    fun write( a: CompoundTag ): BufWrapper { buf.writeCompoundTag(a); return this }
     fun write( a: ByteBuf ): BufWrapper { buf.writeBytes(a); return this }
 
 }

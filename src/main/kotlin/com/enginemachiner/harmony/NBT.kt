@@ -3,7 +3,7 @@ package com.enginemachiner.harmony
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
@@ -15,7 +15,7 @@ object NBT {
     fun has(stack: ItemStack): Boolean { return stack.orCreateTag.contains( MOD_NAME ) }
 
     @JvmStatic
-    fun nbt(stack: ItemStack): NbtCompound { return stack.tag!!.getCompound( MOD_NAME ) }
+    fun nbt(stack: ItemStack): CompoundTag { return stack.tag!!.getCompound( MOD_NAME ) }
 
     fun id(stack: ItemStack): Int { return nbt(stack).getInt("ID") }
 
@@ -27,7 +27,7 @@ object NBT {
     }
 
     /** Checks if NBTs match the same IDs. */
-    fun equals( stack: ItemStack, nbt: NbtCompound ): Boolean {
+    fun equals( stack: ItemStack, nbt: CompoundTag ): Boolean {
 
         return has(stack) && id(stack) == nbt.getInt("ID")
 
@@ -35,7 +35,7 @@ object NBT {
 
     fun blockPos(stack: ItemStack): BlockPos { val nbt = nbt(stack);        return blockPos(nbt) }
 
-    private fun blockPos(nbt: NbtCompound): BlockPos {
+    private fun blockPos(nbt: CompoundTag): BlockPos {
 
         val strings = nbt.getString("BlockPos").replace( " ", "" ).split(',')
 
@@ -47,7 +47,7 @@ object NBT {
 
     }
 
-    private fun blockStack( nbt: NbtCompound, world: World ): ItemStack? {
+    private fun blockStack( nbt: CompoundTag, world: World ): ItemStack? {
 
         if ( !nbt.contains("BlockPos") ) return null
 
@@ -59,7 +59,7 @@ object NBT {
 
     }
 
-    private fun getStack( player: PlayerEntity, nbt: NbtCompound ): ItemStack? {
+    private fun getStack( player: PlayerEntity, nbt: CompoundTag ): ItemStack? {
 
         val stack = blockStack( nbt, player.world );        if ( stack != null ) return stack
 
@@ -101,7 +101,7 @@ object NBT {
     }
 
 
-    private fun putInt( nbt: NbtCompound, key: String, value: Int ) {
+    private fun putInt( nbt: CompoundTag, key: String, value: Int ) {
 
         val b = !nbt.contains(key) || nbt.getInt(key) != value
 
@@ -139,7 +139,7 @@ object NBT {
 
     }
 
-    private fun checkDisplay( next: NbtCompound, stack: ItemStack ) {
+    private fun checkDisplay( next: CompoundTag, stack: ItemStack ) {
 
         val former = stack.tag!!
 
@@ -163,7 +163,7 @@ object NBT {
 
         Receiver(netID).register { server, player, buf ->
 
-            val next = buf.readNbt()!!
+            val next = buf.readCompoundTag()!!
 
             serverSend(server) {
 

@@ -92,7 +92,7 @@ open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory 
 
         val nbt = stack.getSubTag("Items")
 
-        if ( nbt != null ) Inventories.readNbt( nbt, items )
+        if ( nbt != null ) Inventories.fromTag( nbt, items )
 
     }
 
@@ -102,7 +102,7 @@ open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory 
 
         val nbt = stack.getOrCreateSubTag("Items")
 
-        Inventories.writeNbt( nbt, items )
+        Inventories.toTag( nbt, items )
 
     }
 
