@@ -90,7 +90,7 @@ open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory 
 
     init {
 
-        val nbt = stack.getSubNbt("Items")
+        val nbt = stack.getSubTag("Items")
 
         if ( nbt != null ) Inventories.readNbt( nbt, items )
 
@@ -100,7 +100,7 @@ open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory 
 
     override fun markDirty() {
 
-        val nbt = stack.getOrCreateSubNbt("Items")
+        val nbt = stack.getOrCreateSubTag("Items")
 
         Inventories.writeNbt( nbt, items )
 

@@ -1,7 +1,6 @@
 package com.enginemachiner.harmony
 
 import com.enginemachiner.harmony.ModItemGroup.itemGroup
-import net.fabricmc.fabric.api.item.v1.FabricItem
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.LivingEntity
@@ -129,7 +128,7 @@ interface HarmonyItem {
 
     fun setupNBT(stack: ItemStack) {
 
-        val nbt = stack.nbt!!;      nbt.put( MOD_NAME, getSetupNBT(stack) )
+        val nbt = stack.tag!!;      nbt.put( MOD_NAME, getSetupNBT(stack) )
 
     }
 
@@ -157,20 +156,21 @@ interface HarmonyItem {
 
 }
 
+// allowNbtUpdateAnimation comes from the next fabric update with a mixin. Rip.
 
 private interface Harmony : HarmonyItem, ModID
 
-abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Harmony, FabricItem {
+abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Harmony {
 
-    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
+//    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
     override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) { tick( stack, world, entity, slot ) }
 
 }
 
-abstract class Item(settings: Settings) : Item(settings), Harmony, FabricItem {
+abstract class Item(settings: Settings) : Item(settings), Harmony {
 
-    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
+//    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
     override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) { tick( stack, world, entity, slot ) }
 

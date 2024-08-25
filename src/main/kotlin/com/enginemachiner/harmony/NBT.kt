@@ -12,10 +12,10 @@ object NBT {
     val netID = modID("network_nbt")
 
     @JvmStatic
-    fun has(stack: ItemStack): Boolean { return stack.orCreateNbt.contains( MOD_NAME ) }
+    fun has(stack: ItemStack): Boolean { return stack.orCreateTag.contains( MOD_NAME ) }
 
     @JvmStatic
-    fun nbt(stack: ItemStack): NbtCompound { return stack.nbt!!.getCompound( MOD_NAME ) }
+    fun nbt(stack: ItemStack): NbtCompound { return stack.tag!!.getCompound( MOD_NAME ) }
 
     fun id(stack: ItemStack): Int { return nbt(stack).getInt("ID") }
 
@@ -141,7 +141,7 @@ object NBT {
 
     private fun checkDisplay( next: NbtCompound, stack: ItemStack ) {
 
-        val former = stack.nbt!!
+        val former = stack.tag!!
 
         if ( next.contains("display") ) {
 
@@ -169,7 +169,7 @@ object NBT {
 
                 val stack = getStack( player, next ) ?: return@serverSend
 
-                val former = stack.nbt!!;      checkDisplay( next, stack )
+                val former = stack.tag!!;      checkDisplay( next, stack )
 
                 former.put( MOD_NAME, next )
 
