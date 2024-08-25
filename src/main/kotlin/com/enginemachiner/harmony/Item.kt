@@ -1,6 +1,7 @@
 package com.enginemachiner.harmony
 
 import com.enginemachiner.harmony.ModItemGroup.itemGroup
+import net.fabricmc.fabric.api.item.v1.FabricItem
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.LivingEntity
@@ -159,7 +160,7 @@ interface HarmonyItem {
 
 private interface Harmony : HarmonyItem, ModID
 
-abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Harmony {
+abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Harmony, FabricItem {
 
     override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 
@@ -167,7 +168,7 @@ abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem
 
 }
 
-abstract class Item(settings: Settings) : Item(settings), Harmony {
+abstract class Item(settings: Settings) : Item(settings), Harmony, FabricItem {
 
     override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
 

@@ -32,7 +32,7 @@ abstract class ModAdvancement : ModID {
 
     fun build( consumer: Consumer<Advancement>, criterion: String = name ): Advancement {
 
-        val advancement = Advancement.Builder.create()
+        val advancement = Advancement.Task.create()
             .display( icon, title(), description(), background, frame, toast, announce, hidden )
             .parent( parent?.advancement ).criterion( criterion, conditions() )
             .build( consumer, "$MOD_NAME/$name" )
