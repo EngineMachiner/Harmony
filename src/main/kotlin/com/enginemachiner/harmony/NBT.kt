@@ -127,7 +127,7 @@ object NBT {
 
         val holder = stack.holder;      if ( holder !is PlayerEntity ) return
 
-        val i = holder.handItems.indexOf(stack)
+        val i = holder.itemsHand.indexOf(stack)
 
         putInt( nbt(stack), "Hand", i )
 

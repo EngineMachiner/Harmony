@@ -21,7 +21,7 @@ val hands = arrayOf( Hand.MAIN_HAND, Hand.OFF_HAND )
 
 fun handItem( player: PlayerEntity, kClass: KClass<*> ): ItemStack {
 
-    return player.handItems.find { kClass.isInstance( it.item ) }!!
+    return player.itemsHand.find { kClass.isInstance( it.item ) }!!
 
 }
 
@@ -86,7 +86,7 @@ interface StackScreen {
 
     fun canOpenScreen( player: PlayerEntity, stack: ItemStack ): Boolean {
 
-        val handStack = player.handItems.find { it != stack }!!
+        val handStack = player.itemsHand.find { it != stack }!!
 
         return handStack.item is AirBlockItem
 
