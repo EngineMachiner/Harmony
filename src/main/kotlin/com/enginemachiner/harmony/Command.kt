@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.*
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
 import net.minecraft.command.argument.AngleArgumentType
 import net.minecraft.command.argument.BlockPosArgumentType
 import net.minecraft.command.argument.ColorArgumentType
@@ -26,7 +26,7 @@ object Command {
 
         fun register( onRegister: OnRegister ) {
 
-            event.register { dispatcher, _, _ ->
+            event.register { dispatcher, _ ->
 
                 val literal = literal(MOD_NAME)
 

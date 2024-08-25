@@ -5,29 +5,24 @@ import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.ArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource
 
 typealias ClientLiteral = LiteralArgumentBuilder<FabricClientCommandSource>
 typealias ClientArgument = RequiredArgumentBuilder<FabricClientCommandSource, out Any>
-private typealias OnClientRegister = (dispatcher: CommandDispatcher<FabricClientCommandSource>, main: ClientLiteral ) -> Unit
+private typealias OnClientRegister = ( dispatcher: CommandDispatcher<FabricClientCommandSource>, main: ClientLiteral ) -> Unit
 
 object Command {
 
     object Client {
 
-        private val event = ClientCommandRegistrationCallback.EVENT
+        private val dispatcher = ClientCommandManager.DISPATCHER
 
         fun register( onRegister: OnClientRegister ) {
 
-            event.register { dispatcher, _ ->
+            val main = ClientCommandManager.literal(MOD_NAME)
 
-                val main = ClientCommandManager.literal(MOD_NAME)
-
-                onRegister( dispatcher, main )
-
-            }
+            onRegister( dispatcher, main )
 
         }
 
