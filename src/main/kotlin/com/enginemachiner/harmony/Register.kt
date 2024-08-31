@@ -23,9 +23,11 @@ object Register {
 
     }
 
-    fun group( group: ItemGroup ): ItemGroup {
+    fun group( data: ItemGroupData ): ItemGroup {
 
-        return Registry.register( Registries.ITEM_GROUP, ModItemGroup.key, group )
+        val group = Registry.register( Registries.ITEM_GROUP, ModItemGroup.key, data.itemGroup )
+
+        item( data.item );          return group
 
     }
 
