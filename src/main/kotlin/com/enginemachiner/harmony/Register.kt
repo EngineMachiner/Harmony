@@ -17,7 +17,7 @@ object Register {
 
     private fun group( item: Item ) {
 
-        if ( item == itemGroup ) return;        val key = ModItemGroup.key
+        if ( item == ModItemGroup.item ) return;        val key = ModItemGroup.key
 
         ItemGroupEvents.modifyEntriesEvent(key).register { it.add(item) }
 
