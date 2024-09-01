@@ -1,6 +1,5 @@
 package com.enginemachiner.harmony
 
-import com.enginemachiner.harmony.ModItemGroup.itemGroup
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.registry.FuelRegistry
 import net.minecraft.block.Block
