@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment
 import net.minecraft.client.particle.*
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.particle.ParticleEffect
+import net.minecraft.particle.SimpleParticleType
 import net.minecraft.util.math.Vec3d
 
 object Particles {
@@ -37,7 +38,7 @@ open class SimpleParticle( clientWorld: ClientWorld, x: Double, y: Double, z: Do
     companion object {
 
         @Environment(EnvType.CLIENT)
-        abstract class Factory( private var provider: SpriteProvider ) : ParticleFactory<ParticleEffect> {
+        abstract class Factory( private var provider: SpriteProvider ) : ParticleFactory<SimpleParticleType> {
 
             open fun template( world: ClientWorld, x: Double, y: Double, z: Double ): SpriteBillboardParticle {
                 return SimpleParticle(world, x, y, z)
@@ -45,7 +46,7 @@ open class SimpleParticle( clientWorld: ClientWorld, x: Double, y: Double, z: Do
 
             override fun createParticle(
 
-                parameters: ParticleEffect, world: ClientWorld,
+                parameters: SimpleParticleType, world: ClientWorld,
 
                 x: Double, y: Double, z: Double,
 
