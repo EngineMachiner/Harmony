@@ -64,7 +64,7 @@ abstract class HarmonyScreen<T: ScreenHandler>(
 
     private val sliders = mutableListOf<Slider>()
 
-    fun addSlider(slider: Slider) { sliders.add(slider);    addDrawableChild(slider) }
+    fun addSlider(slider: Slider) { sliders.add(slider);    addChild(slider) }
 
     @BasedOn("ParentElement.mouseDragged()")
     fun isFocusedDragged( mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double ): Boolean {
@@ -286,7 +286,7 @@ open class Texture( val id: Identifier, private val init: (Texture) -> Unit = {}
 
     fun color(color: FloatArray) {
 
-        RenderSystem.setShaderColor( color[0], color[1], color[2], color[3] )
+        RenderSystem.color4f( color[0], color[1], color[2], color[3] )
 
     }
 
@@ -295,13 +295,13 @@ open class Texture( val id: Identifier, private val init: (Texture) -> Unit = {}
         val r = color.red / 255f;       val g = color.green / 255f
         val b = color.blue / 255f;     val a = color.alpha / 255f
 
-        RenderSystem.setShaderColor( r, g, b, a )
+        RenderSystem.color4f( r, g, b, a )
 
     }
 
     open fun draw(matrices: MatrixStack) {
 
-        RenderSystem.setShaderTexture( 0, id )
+        client().textureManager.bindTexture(id)
 
 
         val x = x.toInt();      val y = y.toInt()
