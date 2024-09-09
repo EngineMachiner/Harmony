@@ -64,7 +64,7 @@ abstract class HarmonyScreen<T: ScreenHandler>(
 
     private val sliders = mutableListOf<Slider>()
 
-    fun addSlider(slider: Slider) { sliders.add(slider);    addDrawableChild(slider) }
+    fun addSlider(slider: Slider) { sliders.add(slider);    addChild(slider) }
 
     @BasedOn("ParentElement.mouseDragged()")
     fun isFocusedDragged( mouseX: Double, mouseY: Double, button: Int, deltaX: Double, deltaY: Double ): Boolean {
@@ -238,7 +238,7 @@ open class RenderText( private val init: TextFunction = {} ) : HarmonyText {
 
     fun height(): Float { return renderer.fontHeight.toFloat() }
 
-    fun setPos( widget: ClickableWidget? ) {
+    fun setPos( widget: AbstractPressableButtonWidget? ) {
 
         this.x = widget!!.x.toFloat();        this.y = widget.y.toFloat()
 
@@ -286,7 +286,7 @@ open class Texture( val id: Identifier, private val init: (Texture) -> Unit = {}
 
     fun color(color: FloatArray) {
 
-        RenderSystem.setShaderColor( color[0], color[1], color[2], color[3] )
+        RenderSystem.color4f( color[0], color[1], color[2], color[3] )
 
     }
 
@@ -295,13 +295,13 @@ open class Texture( val id: Identifier, private val init: (Texture) -> Unit = {}
         val r = color.red / 255f;       val g = color.green / 255f
         val b = color.blue / 255f;     val a = color.alpha / 255f
 
-        RenderSystem.setShaderColor( r, g, b, a )
+        RenderSystem.color4f( r, g, b, a )
 
     }
 
     open fun draw(matrices: MatrixStack) {
 
-        RenderSystem.setShaderTexture( 0, id )
+        client().textureManager.bindTexture(id)
 
 
         val x = x.toInt();      val y = y.toInt()
@@ -339,25 +339,25 @@ abstract class Offset<T> {
 
 interface HarmonyWidget {
 
-    fun addPos(a: Float) { this as ClickableWidget
+    fun addPos(a: Float) { this as AbstractPressableButtonWidget
 
         x += a.toInt();   y += a.toInt()
 
     }
 
-    fun addPos( x: Float, y: Float ) { this as ClickableWidget
+    fun addPos( x: Float, y: Float ) { this as AbstractPressableButtonWidget
 
         this.x += x.toInt();   this.y += y.toInt()
 
     }
 
-    fun setPos(a: Float) { this as ClickableWidget
+    fun setPos(a: Float) { this as AbstractPressableButtonWidget
 
         x = a.toInt();    y = a.toInt()
 
     }
 
-    fun setPos( x: Float, y: Float ) { this as ClickableWidget
+    fun setPos( x: Float, y: Float ) { this as AbstractPressableButtonWidget
 
         this.x = x.toInt();    this.y = y.toInt()
 
@@ -370,26 +370,26 @@ interface HarmonyWidget {
 
     }
 
-    fun centerX(screenWidth: Int) { this as ClickableWidget
+    fun centerX(screenWidth: Int) { this as AbstractPressableButtonWidget
 
         x = offset( screenWidth * 0.5f, width.toFloat() )
 
     }
 
-    fun centerY(screenHeight: Int) { this as ClickableWidget
+    fun centerY(screenHeight: Int) { this as AbstractPressableButtonWidget
 
         y = offset( screenHeight * 0.5f, height.toFloat() )
 
     }
 
 
-    fun offsetX(w: Float) { this as ClickableWidget
+    fun offsetX(w: Float) { this as AbstractPressableButtonWidget
 
         x = offset( x.toFloat(), - w * 2 )
 
     }
 
-    fun offsetY(h: Float) { this as ClickableWidget
+    fun offsetY(h: Float) { this as AbstractPressableButtonWidget
 
         y = offset( y.toFloat(), - h * 2 )
 
