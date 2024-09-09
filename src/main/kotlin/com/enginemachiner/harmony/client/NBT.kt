@@ -22,7 +22,7 @@ object NBT {
     /** Stores the display temporally for it to be sent later. */
     fun saveDisplay(stack: ItemStack, next: NbtCompound ) {
 
-        if ( next.contains("resetDisplay") ) return;        val former = stack.nbt!!
+        if ( next.contains("resetDisplay") ) return;        val former = stack.tag!!
 
         next.put( "display", former.getCompound("display") )
 
