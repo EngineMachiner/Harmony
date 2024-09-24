@@ -5,6 +5,8 @@
 
 # Harmony
 
+Harmony is a library that tries to simplify mod creation. It has shortcuts to simplify things and has helpers to register generally, do translations, tweak UI, do item and stack behavior, handle NBT data, handle user messages, use mod identifiers in a generic way, schedule timers on tick, do mod files management, advancements and more!
+
 It's my Minecraft Fabric library mod for my mods. It helps me chill while I code.
 
 <div align="center">
