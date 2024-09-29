@@ -33,10 +33,13 @@ abstract class ModAdvancement : ModID {
 
     fun build( consumer: Consumer<AdvancementEntry>, criterion: String = name ): AdvancementEntry {
 
-        val advancement = Advancement.Builder.create()
+        val task = Advancement.Task.create()
             .display( icon, title(), description(), background, frame, toast, announce, hidden )
-            .parent( parent?.advancement ).criterion( criterion, conditions() )
-            .build( consumer, "$MOD_NAME/$name" )
+            .criterion( criterion, conditions() )
+
+        if ( parent != null ) task.parent( parent!!.advancement )
+
+        val advancement = task.build( consumer, "$MOD_NAME/$name" )
 
         this.advancement = advancement;         return advancement
 
