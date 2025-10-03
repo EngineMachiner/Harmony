@@ -1,16 +1,27 @@
 package com.enginemachiner.harmony
 
-import net.minecraft.block.BlockWithEntity
 import net.minecraft.entity.Entity
+import net.minecraft.entity.EquipmentSlot
+import net.minecraft.util.Hand
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.explosion.Explosion.DestructionType
 
-fun addVelocity( entity: Entity, delta: Vec3d ) { entity.addVelocity( delta.x, delta.y, delta.z ) }
+/**
+ * Converts a Hand enum value to its corresponding EquipmentSlot enum value.
+ */
+fun Hand.toEquipmentSlot(): EquipmentSlot {
 
-fun explode( e: Entity, power: Float, type: DestructionType, createFire: Boolean = false ) {
-
-    val world = e.world;        world.createExplosion( e, e.x, e.y, e.z, power, createFire, type )
+    return when (this) {
+        Hand.MAIN_HAND -> EquipmentSlot.MAINHAND
+        Hand.OFF_HAND -> EquipmentSlot.OFFHAND
+    }
 
 }
 
-abstract class BlockWithEntity(settings: Settings) : BlockWithEntity(settings), ModID
+fun Entity.addVelocity( delta: Vec3d ) { addVelocity( delta.x, delta.y, delta.z ) }
+
+fun Entity.explode( power: Float, type: DestructionType, createFire: Boolean = false ) {
+
+    world.createExplosion( this, x, y, z, power, createFire, type )
+
+}

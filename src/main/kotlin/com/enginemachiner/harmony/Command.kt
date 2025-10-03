@@ -1,124 +1,141 @@
 package com.enginemachiner.harmony
 
-import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.*
-import com.mojang.brigadier.builder.LiteralArgumentBuilder
-import com.mojang.brigadier.builder.RequiredArgumentBuilder
+import com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg
+import com.mojang.brigadier.arguments.FloatArgumentType.floatArg
+import com.mojang.brigadier.arguments.IntegerArgumentType.integer
+import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
-import net.minecraft.command.argument.AngleArgumentType
-import net.minecraft.command.argument.BlockPosArgumentType
-import net.minecraft.command.argument.ColorArgumentType
-import net.minecraft.server.command.CommandManager
+import com.mojang.brigadier.tree.CommandNode
+import net.minecraft.command.argument.*
+import net.minecraft.entity.Entity
+import net.minecraft.server.command.CommandManager.argument
+import net.minecraft.server.command.CommandManager.literal
 import net.minecraft.server.command.ServerCommandSource
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Formatting
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Vec2f
+import net.minecraft.util.math.Vec3d
 
-typealias Literal = LiteralArgumentBuilder<ServerCommandSource>
-typealias Argument = RequiredArgumentBuilder<ServerCommandSource, out Any>
-private typealias OnRegister = ( dispatcher: CommandDispatcher<ServerCommandSource>, main: Literal ) -> Unit
+typealias HarmonyArgumentBuilder<T> = ArgumentBuilder<T, *>
+typealias CommandSetup<V> = V.() -> Unit
 
-object Command {
+private typealias Builder<T> = HarmonyArgumentBuilder<T>
+private typealias Setup<V> = CommandSetup<V>
 
-    object Server {
+abstract class Command<T, V>( val builder: Builder<T> ) {
 
-        private val event = CommandRegistrationCallback.EVENT
+    fun build(): CommandNode<T> = builder.build()
 
-        fun register( onRegister: OnRegister ) {
+    fun executes( action: CommandContext<T>.() -> Int ): Command<T, V> {
 
-            event.register { dispatcher, _, _ ->
-
-                val literal = literal(MOD_NAME)
-
-                onRegister( dispatcher, literal )
-
-            }
-
-        }
-
-        fun literal( s: String ): Literal { return CommandManager.literal(s) }
-
-        fun argument( type: ArgumentType<*>, name: String = "" ): Argument {
-
-            return CommandManager.argument( name, type )
-
-        }
+        builder.executes { action(it) };            return this
 
     }
 
-    object Arguments {
+    fun requires( predicate: T.() -> Boolean ): Command<T, V> {
 
-        fun bool(): BoolArgumentType { return BoolArgumentType.bool() }
+        builder.requires { predicate(it) };            return this
 
-        fun bool( ctx: CommandContext<*>, name: String = "" ): Boolean {
+    }
 
-            return BoolArgumentType.getBool( ctx, name )
+    abstract fun literal( name: String, setup: Setup<V> ): Command<T, V>
+    abstract fun argument( name: String, type: ArgumentType<*>, setup: Setup<V> ): Command<T, V>
 
-        }
+    fun bool( name: String = "bool", setup: Setup<V> ) = argument( name, BOOL, setup )
+    fun string( name: String = "message", setup: Setup<V> ) = argument( name, STRING, setup )
 
+    fun int( name: String = "integer", setup: Setup<V> ) = argument( name, integer(), setup )
+    fun int( name: String = "integer", min: Int, max: Int, setup: Setup<V> ) = argument( name, integer(min, max), setup )
 
-        fun string(): StringArgumentType { return StringArgumentType.string() }
+    fun float( name: String = "float", setup: Setup<V> ) = argument( name, floatArg(), setup )
+    fun float( name: String = "float", min: Float, max: Float, setup: Setup<V> ) = argument( name, floatArg(min, max), setup )
 
-        fun string( ctx: CommandContext<*>, name: String = "" ): String {
+    fun double( name: String = "double", setup: Setup<V> ) = argument( name, doubleArg(), setup )
+    fun double( name: String = "double", min: Double, max: Double, setup: Setup<V> ) = argument( name, doubleArg(min, max), setup )
 
-            return StringArgumentType.getString( ctx, name )
+    protected companion object {
 
-        }
-
-
-        fun int(): IntegerArgumentType { return IntegerArgumentType.integer() }
-
-        fun int( ctx: CommandContext<*>, name: String = "" ): Int {
-
-            return IntegerArgumentType.getInteger( ctx, name )
-
-        }
-
-
-        fun float(): FloatArgumentType { return FloatArgumentType.floatArg() }
-
-        fun float( ctx: CommandContext<*>, name: String = "" ): Float {
-
-            return FloatArgumentType.getFloat( ctx, name )
-
-        }
-
-
-        fun double(): DoubleArgumentType { return DoubleArgumentType.doubleArg() }
-
-        fun double( ctx: CommandContext<*>, name: String = "" ): Double {
-
-            return DoubleArgumentType.getDouble( ctx, name )
-
-        }
-
-
-        fun color(): ColorArgumentType { return ColorArgumentType.color() }
-
-        fun color( ctx: CommandContext<ServerCommandSource>, name: String = "" ): Formatting {
-
-            return ColorArgumentType.getColor( ctx, name )
-
-        }
-
-
-        fun blockPos(): BlockPosArgumentType { return BlockPosArgumentType.blockPos() }
-
-        fun blockPos( ctx: CommandContext<ServerCommandSource>, name: String = "" ): BlockPos {
-
-            return BlockPosArgumentType.getBlockPos( ctx, name )
-
-        }
-
-
-        fun angle(): AngleArgumentType { return AngleArgumentType.angle() }
-
-        fun angle( ctx: CommandContext<ServerCommandSource>, name: String = "" ): Float {
-
-            return AngleArgumentType.getAngle( ctx, name )
-
-        }
+        val BOOL: BoolArgumentType = BoolArgumentType.bool()
+        val STRING: StringArgumentType = StringArgumentType.string()
 
     }
 
 }
+
+private typealias ServerCommandType = Command<ServerCommandSource, ServerCommand>
+private typealias ServerBuilder = Builder<ServerCommandSource>
+private typealias ServerSetup = Setup<ServerCommand>
+
+fun serverCommand( name: String, setup: ServerSetup ) = ServerCommand(name).apply(setup).build()
+
+class ServerCommand( builder: ServerBuilder ) : ServerCommandType(builder) {
+
+    constructor( name: String ) : this( literal(name) )
+    constructor( name: String, type: ArgumentType<*> ) : this( argument(name, type) )
+
+    override fun literal( name: String, setup: ServerSetup ): ServerCommand {
+
+        val child = ServerCommand(name).apply(setup);           builder.then( child.builder )
+
+        return this
+
+    }
+
+    override fun argument( name: String, type: ArgumentType<*>, setup: ServerSetup ): ServerCommand {
+
+        val child = ServerCommand(name, type).apply(setup);          builder.then( child.builder )
+
+        return this
+
+    }
+
+    fun color( name: String = "color", setup: ServerSetup ) = argument( name, COLOR, setup )
+    fun angle( name: String = "angle", setup: ServerSetup ) = argument( name, ANGLE, setup )
+    fun rotation( name: String = "rotation", setup: ServerSetup ) = argument( name, ROTATION, setup )
+
+    fun blockPos( name: String = "pos", setup: ServerSetup ) = argument( name, BLOCK_POS, setup )
+    fun vec3( name: String = "x y z", setup: ServerSetup ) = argument( name, VEC3, setup )
+    fun vec2( name: String = "x y", setup: ServerSetup ) = argument( name, VEC2, setup )
+
+    fun player( name: String = "player", setup: ServerSetup ) = argument( name, ENTITY, setup )
+    fun entity( name: String = "entity", setup: ServerSetup ) = argument( name, ENTITY, setup )
+    fun entities( name: String = "entities", setup: ServerSetup ) = argument( name, ENTITIES, setup )
+
+    private companion object {
+
+        val COLOR: ColorArgumentType = ColorArgumentType.color()
+        val ANGLE: AngleArgumentType = AngleArgumentType.angle()
+        val ROTATION: RotationArgumentType = RotationArgumentType.rotation()
+
+        val BLOCK_POS: BlockPosArgumentType = BlockPosArgumentType.blockPos()
+        val VEC3: Vec3ArgumentType = Vec3ArgumentType.vec3()
+        val VEC2: Vec2ArgumentType = Vec2ArgumentType.vec2()
+
+        val ENTITY: EntityArgumentType = EntityArgumentType.entity()
+        val ENTITIES: EntityArgumentType = EntityArgumentType.entities()
+
+    }
+
+}
+
+// Extension functions for easier argument retrieval.
+
+fun CommandContext<*>.bool( name: String = "bool" ): Boolean = BoolArgumentType.getBool(this, name)
+fun CommandContext<*>.int( name: String = "integer" ): Int = IntegerArgumentType.getInteger(this, name)
+fun CommandContext<*>.float( name: String = "float" ): Float = FloatArgumentType.getFloat(this, name)
+fun CommandContext<*>.double( name: String = "double" ): Double = DoubleArgumentType.getDouble(this, name)
+fun CommandContext<*>.string( name: String = "message" ): String = StringArgumentType.getString(this, name)
+
+fun CommandContext<ServerCommandSource>.color( name: String = "color" ): Formatting = ColorArgumentType.getColor(this, name)
+fun CommandContext<ServerCommandSource>.angle( name: String = "angle" ): Float = AngleArgumentType.getAngle(this, name)
+fun CommandContext<ServerCommandSource>.rotation( name: String = "rotation" ): PosArgument = RotationArgumentType.getRotation(this, name)
+
+fun CommandContext<ServerCommandSource>.blockPos( name: String = "pos" ): BlockPos = BlockPosArgumentType.getBlockPos(this, name)
+fun CommandContext<ServerCommandSource>.vec3( name: String = "x y z" ): Vec3d = Vec3ArgumentType.getVec3(this, name)
+fun CommandContext<ServerCommandSource>.vec2( name: String = "x y" ): Vec2f = Vec2ArgumentType.getVec2(this, name)
+
+fun CommandContext<ServerCommandSource>.player( name: String = "player" ): ServerPlayerEntity = EntityArgumentType.getPlayer(this, name)
+fun CommandContext<ServerCommandSource>.entity( name: String = "entity" ): Entity = EntityArgumentType.getEntity(this, name)
+fun CommandContext<ServerCommandSource>.entities( name: String = "entities" ): Collection<Entity> = EntityArgumentType.getEntities(this, name)

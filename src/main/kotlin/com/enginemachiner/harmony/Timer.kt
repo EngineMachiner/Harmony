@@ -1,36 +1,28 @@
 package com.enginemachiner.harmony
 
-import com.enginemachiner.harmony.Async.threadID
+private fun currentThreadID() = Thread.currentThread().id
 
-private fun id(): Long { return threadID() }
+class Timer( private val tickLimit: Int,     private val callback: () -> Unit ) {
 
-class Timer( private val tickLimit: Int,     private val function: () -> Unit ) {
+    init { timers.add(this) };          private val threadID = currentThreadID()
 
-    private val id = id();        var remove = false
+    private var ticks = 0;          private var remove = false
 
-    private var ticks = 0;        init { timers.add(this) }
+    fun remove() { remove = true }
 
-    private fun kill() { remove = true }
+    internal fun tick() {
 
-    fun tick() {
+        if ( threadID != currentThreadID() || remove ) return
 
-        if ( id != id() || remove ) { return }
-
-        if ( ticks > tickLimit ) { function(); kill() } else ticks++
+        if ( ticks > tickLimit ) { callback(); remove() } else ticks++
 
     }
 
     companion object {
 
-        val timers = mutableListOf<Timer?>()
+        val timers = mutableListOf<Timer>()
 
-        fun tickTimers() {
-
-            val list = timers.toList().filterNotNull();      list.forEach { it.tick() }
-
-            list.forEach { if ( it.remove ) timers.remove(it) }
-
-        }
+        fun tickTimers() { timers.forEach { it.tick() };           timers.removeIf { it.remove } }
 
     }
 

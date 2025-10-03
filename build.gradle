@@ -1,25 +1,36 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+
 	id 'maven-publish'
-	id 'fabric-loom' version '1.6-SNAPSHOT'
-  	id "org.jetbrains.kotlin.jvm" version "1.9.24"
+	id 'fabric-loom' version "$loom_version"
+  	id "org.jetbrains.kotlin.jvm" version "2.2.0"
+
 }
 
-version = "mc${ project.minecraft_version }-v${ project.mod_version }"
-group = project.maven_group
+def archivesBaseName = project.archives_base_name
+def mavenGroup = project.maven_group
 
-base { archivesName = project.archives_base_name }
+def minecraftVersion = project.minecraft_version
+def loaderVersion = project.loader_version
+def yarnMappings = project.yarn_mappings
+def modVersion = project.mod_version
+
+def fabricVersion = project.fabric_version
+def fabricKotlinVersion = project.fabric_kotlin_version
+
+version = "mc$minecraftVersion-v$modVersion"
+group = mavenGroup
+
+base { archivesName = archivesBaseName }
 
 loom {
 
 	splitEnvironmentSourceSets()
 
 	mods {
-		"harmony" {
-			sourceSet sourceSets.main
-			sourceSet sourceSets.client
-		}
+		"harmony" { sourceSet sourceSets.main;          sourceSet sourceSets.client }
 	}
 
 }
@@ -35,28 +46,41 @@ repositories {
 dependencies {
 
 	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	minecraft "com.mojang:minecraft:$minecraftVersion"
+	mappings "net.fabricmc:yarn:$yarnMappings:v2"
+	modImplementation "net.fabricmc:fabric-loader:$loaderVersion"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:$fabricVersion"
+	modImplementation "net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion"
 
 }
 
 processResources {
 
-	inputs.property "version", project.version
+	inputs.property "version", version
 
-	filesMatching("fabric.mod.json") { expand "version": project.version }
+	filesMatching("fabric.mod.json") {
+
+        expand(
+                "version": version,
+
+                "minecraft_version": minecraftVersion,
+
+                "fabric_loader": loaderVersion,
+                "fabric_kotlin_version": fabricKotlinVersion
+        )
+
+    }
 
 }
 
-tasks.withType(JavaCompile).configureEach { it.options.release = 17 }
+tasks.withType( JavaCompile ).configureEach { it.options.release = 17 }
 
 tasks.withType( KotlinCompile ).configureEach {
-	kotlinOptions { jvmTarget = 17 }
+    compilerOptions {
+        jvmTarget.set( JvmTarget.JVM_17 )
+    }
 }
 
 java {
@@ -70,7 +94,9 @@ java {
 }
 
 jar {
-	from("LICENSE") { rename { "${it}_${project.base.archivesName.get()}"} }
+    from("LICENSE") {
+        rename { "${it}_${archivesBaseName}" }
+    }
 }
 
 // configure the maven publication
@@ -79,7 +105,7 @@ publishing {
 	publications {
 
 		create( "mavenJava", MavenPublication ) {
-			artifactId = project.archives_base_name;		from components.java
+			artifactId = archivesBaseName;		from components.java
 		}
 
 	}

@@ -1,19 +1,22 @@
 package com.enginemachiner.harmony
 
 import net.minecraft.text.MutableText
-import net.minecraft.text.Text
+import net.minecraft.text.Text.translatable
 
-object Translation {
+class Translation( private val namespace: String ) {
 
-    fun has( key: String ): Boolean { return get(key) != "$MOD_NAME.$key" }
-    fun get( key: String ): String { return Text.translatable( "$MOD_NAME.$key" ).string }
-    fun item( key: String ): String { return Text.translatable( "item.$MOD_NAME.$key" ).string }
-    fun block( key: String ): String { return Text.translatable( "block.$MOD_NAME.$key" ).string }
+    val advancement = Advancement()
 
-    object Advancement {
+    fun get( key: String ): MutableText = translatable("$namespace.$key")
+    fun item( key: String ): MutableText = translatable("item.$namespace.$key")
+    fun block( key: String ): MutableText = translatable("block.$namespace.$key")
+    fun entity( key: String ): MutableText = translatable("entity.$namespace.$key")
+    fun enchantment( key: String ): MutableText = translatable("enchantment.$namespace.$key")
 
-        fun title( key: String ): MutableText { return Text.translatable( "$MOD_NAME.advancements.$key.title" ) }
-        fun description( key: String ): MutableText { return Text.translatable( "$MOD_NAME.advancements.$key.description" ) }
+    inner class Advancement {
+
+        fun title( key: String ): MutableText = get("advancements.$key.title")
+        fun description( key: String ): MutableText = get("advancements.$key.description")
 
     }
 

@@ -5,82 +5,82 @@ import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
-import net.minecraft.screen.slot.Slot
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.Direction
 
-fun slotIndex( slots: DefaultedList<Slot>, stack: ItemStack ): Int? {
+fun Inventory.toList(): List<ItemStack> {
 
-    val stack = slots.find { it.stack == stack } ?: return null
-
-    return slots.indexOf(stack)
+    val range = 0 until size();         return range.map { getStack(it) }
 
 }
 
-fun inventoryList( inventory: Inventory ): List<ItemStack> {
-
-    val list = mutableListOf<ItemStack>()
-
-    for ( i in 0 until inventory.size() ) list.add( inventory.getStack(i) )
-
-    return list
-
-}
-
-/** It's just a custom inventory. */
 interface HarmonyInventory : SidedInventory {
 
+    /**
+     * Retrieves the item list of this inventory.
+     * Must return the same instance every time it's called.
+     */
     fun items(): DefaultedList<ItemStack>
 
-    override fun getAvailableSlots(side: Direction): IntArray {
+    override fun clear() { items().clear() }
 
-        val result = IntArray( size() );       for ( i in result.indices ) result[i] = i
+    override fun size() = items().size
 
-        return result
+    /**
+     * Checks if the inventory is empty.
+     * @return true if this inventory has only empty stacks, false otherwise.
+     */
+    override fun isEmpty() = items().all { it.isEmpty }
 
-    }
+    override fun getStack( slot: Int ) = items()[slot]
 
-    override fun canInsert( slot: Int, stack: ItemStack, direction: Direction? ): Boolean { return true }
+    override fun getAvailableSlots( side: Direction ): IntArray {
 
-    override fun canExtract( slot: Int, stack: ItemStack, direction: Direction ): Boolean { return true }
-
-    override fun size(): Int { return items().size }
-
-    override fun isEmpty(): Boolean {
-
-        for ( i in 0 until size() ) if ( !getStack(i).isEmpty ) return false
-
-        return true
+        val size = size();          return IntArray(size) { i -> i }
 
     }
 
-    override fun getStack(slot: Int): ItemStack { return items()[slot] }
+    override fun canPlayerUse( player: PlayerEntity ) = true
 
-    override fun removeStack( slot: Int, amount: Int ): ItemStack {
+    override fun canInsert( slot: Int, stack: ItemStack, direction: Direction? ) = true
+    override fun canExtract( slot: Int, stack: ItemStack, direction: Direction ) = true
 
-        val result = Inventories.splitStack( items(), slot, amount )
-
-        if ( !result.isEmpty ) markDirty();         return result
-
-    }
-
-    override fun removeStack(slot: Int): ItemStack {
-
-        return Inventories.removeStack( items(), slot )
-
-    }
-
+    /**
+     * Replaces the current stack in an inventory slot with the provided stack.
+     * @param slot  The inventory slot of which to replace the item stack.
+     * @param stack The replacing item stack. If the stack is too big for
+     *              this inventory max count,
+     *              it gets resized to this inventory's maximum amount.
+     */
     override fun setStack( slot: Int, stack: ItemStack ) {
 
-        items()[slot] = stack;          val max = maxCountPerStack
+        val max = maxCountPerStack;             items()[slot] = stack
 
         if ( stack.count > max ) stack.count = max
 
     }
 
-    override fun clear() { items().clear() }
+    /**
+     * Removes items from an inventory slot.
+     * @param slot  The slot to remove from.
+     * @param count How many items to remove. If there are less items in the slot than what are requested,
+     *              takes all items in that slot.
+     */
+    override fun removeStack( slot: Int, amount: Int ): ItemStack {
 
-    override fun canPlayerUse( player: PlayerEntity ): Boolean { return true }
+        return Inventories.splitStack( items(), slot, amount )
+
+    }
+
+    /**
+     * Removes all items from an inventory slot.
+     * @param slot The slot to remove from.
+     */
+    override fun removeStack( slot: Int ): ItemStack {
+
+        return Inventories.removeStack( items(), slot )
+
+    }
 
 }
 
@@ -96,13 +96,11 @@ open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory 
 
     }
 
-    override fun items(): DefaultedList<ItemStack> { return items }
+    override fun items(): DefaultedList<ItemStack> = items
 
     override fun markDirty() {
 
-        val nbt = stack.getOrCreateSubNbt("Items")
-
-        Inventories.writeNbt( nbt, items )
+        val nbt = stack.getOrCreateSubNbt("Items");         Inventories.writeNbt( nbt, items )
 
     }
 

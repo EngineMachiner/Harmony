@@ -1,173 +1,128 @@
 package com.enginemachiner.harmony
 
+import com.google.gson.Gson
+import net.fabricmc.loader.api.FabricLoader
 import com.google.gson.GsonBuilder
-import org.apache.commons.lang3.SystemUtils
-import java.io.BufferedReader
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 
-/** Get the system separator. */
-private fun separator(): Char { return if ( SystemUtils.IS_OS_WINDOWS ) ';' else ':' }
+private val LOADER: FabricLoader = FabricLoader.getInstance()
 
-private val regex = Regex("\\$[A-Z]*")
+private fun existingPath( parent: String, child: String ): String? {
 
-/** Get the environment / system path if there is one. */
-fun envPath(path: String): String {
+    val isEmpty = child.isEmpty();          val file = if (isEmpty) File(parent) else File( parent, child )
+
+    val exists = file.exists();             return if (exists) file.path else null
+
+}
+
+/**
+ * Resolves a path that may start with an environment variable.
+ * @param path Path in format "$ENV_VAR/optional/subpath"
+ */
+fun envPath( path: String ): String {
 
     if ( path.isEmpty() || path[0] != '$' ) return path
 
 
-    var envKey = regex.find(path)!!.value
+    val s = File.separator
 
-    val sub = path.substringAfter("$envKey/")
+    val (envVar, subPath) = path.substring(1).split( s, limit = 2 )
 
-
-    envKey = envKey.substringAfter("$")
-
-    val directories = System.getenv(envKey) ?: return path
+    val envValue = System.getenv(envVar) ?: return path
 
 
-    val list = directories.split( separator() )
+    val contains = envValue.contains(s);            var envPath: String? = existingPath( envValue, subPath )
 
+    if (contains) envPath = envValue.split(s).find { existingPath( it, subPath ) != null }
 
-    list.forEach {
-
-        val path = it + "\\$sub";       if ( File(path).exists() ) return path
-
-    }
-
-
-    return path
+    return envPath ?: path
 
 }
 
-/** Read output from a buffered reader. */
-fun output( reader: BufferedReader ): String? {
+class SecureFileAccessor( mod: Mod, userPath: String ) {
 
-    var output = reader.readLine()
+    private val id = mod.id
 
-    while (true) {
+    val path: Path = LOADER.gameDir.resolve(id)
 
-        val line = reader.readLine() ?: break;          output += line
+    private val resolvedPath = path.resolve( userPath ).normalize()
 
-    }
+    val canonicalPath: Path = resolvedPath.toRealPath()
 
-    return output
+    fun isValid(): Boolean = canonicalPath.startsWith(path)
 
-}
-
-/** Files that are in the mod's folder. */
-open class ModFile( private val name: String ) : File(name) {
-
-    init { init() }
-
-    private fun init() {
-
-        val name = name.replace( "/", "\\" )
-
-        if ( name.startsWith("$MOD_NAME\\") || name.isEmpty() ) return
-
-
-        modPrint( warning() )
-
-        setExecutable(false);     setReadable(false);     setWritable(false)
-
-    }
-
-    private fun warning(): String {
-
-        val key = "error.denied"
-
-        if ( Translation.has(key) ) return Message.parse(key).replace( "X", name )
-
-        return "[ERROR]: Access denied for $name"
-
-    }
+    fun toFile(): File = canonicalPath.toFile()
 
 }
 
-abstract class ConfigFile<T : Any>(
+class ConfigManager( mod: Mod ) {
 
-    s: String,      private val defaults: KClass<T>
+    private val id = mod.id
 
-): File("$DIRECTORY$s.json") {
+    private val directory = LOADER.configDir.resolve(id)
 
-    protected var map = mutableMapOf<String, Any>()
+    init { Files.createDirectories(directory) }
 
-    protected var data: T? = null
+    private fun path( fileName: String ) = directory.resolve("$fileName.json")
 
+    private fun <T: Any> create( fileName: String, defaults: KClass<T> ): T {
 
-    abstract fun setDefaults()
+        val data = defaults.createInstance();           save( fileName, data )
 
-
-    private fun init() { create(); read() }
-
-    init { init() }     open fun check() {}
-
-
-    fun data(): T { return data!! }
-
-
-    private fun read() {
-
-        data = GSON.fromJson( reader(), defaults.java );    check()
-
-        map = GSON.fromJson( reader(), map::class.java )
+        return data
 
     }
 
-    fun write() { writeText( GSON.toJson(data) ) }
+    /**
+     * Loads a config file or creates it with default values if it doesn't exist
+     * @param fileName Config file name without extension
+     * @param defaults Class that provides default config values
+     */
+    fun <T: Any> get( fileName: String, defaults: KClass<T> ): T {
+
+        val path = path(fileName)
 
 
-    open fun canCreate(): Boolean { return true }
+        val exists = Files.exists(path)
 
-    private fun create() {
-
-        if ( !canCreate() || exists() || length() > 0L ) return
-
-        createNewFile();        setDefaults()
-
-    }
+        if ( !exists ) return create( fileName, defaults )
 
 
-    fun keys(): Set<String> { return map.keys }
+        val json = Files.readString(path);          val java = defaults.java
 
-    fun keys( kClass: KClass<*> ): List<String> {
-
-        return map.keys.filter { kClass.isInstance( map[it] ) }
-
-    }
-
-
-    fun toMap() { check();      map = json( data, map::class ) }
-
-    fun set( key: String, value: Any ) {
-
-        map[key] = value;       data = json(map, defaults);     toMap()
+        return GSON.fromJson( json, java )
 
     }
 
+    /**
+     * Saves a config to file.
+     * @param fileName Config file name without extension
+     * @param data The config object to save
+     */
+    fun <T> save( fileName: String, data: T ) {
 
-    companion object {
+        val path = path(fileName);          val json = GSON.toJson(data)
 
-        private val GSON = GsonBuilder().setPrettyPrinting().create()
-
-        private val DIRECTORY = "config/$MOD_NAME/"
-
-        fun <T: Any> json( src: Any?, kClass: KClass<T> ): T {
-
-            val toJson = GSON.toJson(src)
-
-            return GSON.fromJson( toJson, kClass.java )
-
-        }
-
-        fun checkDirectory() {
-
-            val dir = File(DIRECTORY);      if ( !dir.exists() ) dir.mkdirs()
-
-        }
+        Files.writeString( path, json )
 
     }
+
+    private companion object {
+
+        val GSON: Gson = GsonBuilder().setPrettyPrinting().create()
+
+    }
+
+}
+
+class File( private val mod: Mod ) {
+
+    fun secureAccessor( userPath: String ) = SecureFileAccessor( mod, userPath )
+
+    val configManager = ConfigManager(mod)
 
 }

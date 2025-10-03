@@ -1,30 +1,38 @@
 package com.enginemachiner.harmony.client
 
+import com.enginemachiner.harmony.ColorItem
+import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry
-import net.minecraft.client.render.VertexConsumerProvider
-import net.minecraft.client.render.model.json.ModelTransformation
-import net.minecraft.client.util.math.MatrixStack
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry.DynamicItemRenderer
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry.INSTANCE
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry
+import net.minecraft.client.color.item.ItemColorProvider
+import net.minecraft.item.Item
 import net.minecraft.item.ItemConvertible
-import net.minecraft.item.ItemStack
+import java.awt.Color
 
-private typealias itemRegistry = BuiltinItemRendererRegistry
-private typealias itemDynamic = BuiltinItemRendererRegistry.DynamicItemRenderer
-private typealias itemRender = ( ItemStack, ModelTransformation.Mode, MatrixStack, VertexConsumerProvider, Int, Int ) -> Unit
+fun setShaderColor( color: Color ) {
 
-object Renderer {
+    val color = color.getRGBComponents(null);           color.forEachIndexed { i, value -> color[i] = value / 255f }
 
-    object Item {
+    RenderSystem.setShaderColor( color[0], color[1], color[2], color[3] )
 
-        val registry: itemRegistry = BuiltinItemRendererRegistry.INSTANCE
+}
 
-        fun register( item: ItemConvertible, renderer: itemDynamic ) { registry.register( item, renderer ) }
+object ItemRenderer {
 
-        fun create( render: itemRender ): itemDynamic {
+    /** Register item color provider. **/
+    fun register( item: ColorItem ) {
 
-            return BuiltinItemRendererRegistry.DynamicItemRenderer(render)
+        val provider = ItemColorProvider { stack, _ -> item.color(stack) }
 
-        }
+        ColorProviderRegistry.ITEM.register( provider, item as Item )
 
     }
+
+    val registry: BuiltinItemRendererRegistry = INSTANCE
+
+    /** Register a dynamic renderer for an item. **/
+    fun register( item: ItemConvertible, renderer: DynamicItemRenderer ) { registry.register( item, renderer ) }
 
 }

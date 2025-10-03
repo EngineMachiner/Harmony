@@ -1,58 +1,76 @@
 package com.enginemachiner.harmony
 
+import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.registry.FuelRegistry
 import net.minecraft.block.Block
+import net.minecraft.block.BlockState
+import net.minecraft.block.entity.BlockEntity
+import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.enchantment.Enchantment
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
+import net.minecraft.particle.DefaultParticleType
 import net.minecraft.sound.SoundEvent
-import net.minecraft.util.registry.Registry
-import kotlin.reflect.KClass
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.registry.Registry.BLOCK
+import net.minecraft.util.registry.Registry.BLOCK_ENTITY_TYPE
+import net.minecraft.util.registry.Registry.ENCHANTMENT
+import net.minecraft.util.registry.Registry.ITEM
+import net.minecraft.util.registry.Registry.PARTICLE_TYPE
+import net.minecraft.util.registry.Registry.SOUND_EVENT
+import net.minecraft.util.registry.Registry.register
 
-object Register {
+private typealias BlockEntityConstructor = (BlockPos, BlockState) -> BlockEntity
 
-    fun block( block: Block, settings: Item.Settings ): Block {
+class Register( private val mod: Mod ) {
 
-        val name = ( block as ModID ).className();      val id = modID(name)
+    private fun id( path: String ) = mod.id(path)
 
+    fun item( name: String, item: Item ): Item {
 
-        val block = Registry.register( Registry.BLOCK, id, block )
-
-        val item = BlockItem( block, settings );    Registry.register( Registry.ITEM, id, item )
-
-
-        return block
-
-    }
-
-    fun item( item: Item ): Item {
-
-        val id = ( item as ModID ).classID()
-
-        return Registry.register( Registry.ITEM, id, item )
+        val id = id(name);            return register( ITEM, id, item )
 
     }
 
-    fun sound( path: String ): SoundEvent {
+    data class RegisteredBlock( val block: Block, val item: Item )
 
-        val id = modID(path);      val event = SoundEvent(id)
+    fun block( name: String, block: Block, settings: Item.Settings ): RegisteredBlock {
 
-        return Registry.register( Registry.SOUND_EVENT, id, event )
+        val id = id(name);            val block = register( BLOCK, id, block )
 
-    }
+        val item = BlockItem( block, settings );            register( ITEM, id, item )
 
-    fun enchantment( enchantment: Enchantment ): Enchantment {
-
-        val path = ( enchantment as ModID ).classID()
-
-        return Registry.register( Registry.ENCHANTMENT, path, enchantment )
+        return RegisteredBlock( block, item )
 
     }
 
-    fun fuel( kClass: KClass<*>, time: Int ) {
+    fun blockEntity( name: String, constructor: BlockEntityConstructor, vararg blocks: Block ): BlockEntityType<BlockEntity> {
 
-        FuelRegistry.INSTANCE.add( modItem(kClass), time )
+        val id = id(name);          val type = FabricBlockEntityTypeBuilder.create( constructor, *blocks ).build()
+
+        return register( BLOCK_ENTITY_TYPE, id, type )
 
     }
+
+    fun sound( name: String ): SoundEvent {
+
+        val id = id(name);          val event = SoundEvent(id)
+
+        return register( SOUND_EVENT, id, event )
+
+    }
+
+    fun enchantment( name: String, enchantment: Enchantment ): Enchantment {
+
+        val id = id(name);          return register( ENCHANTMENT, id, enchantment )
+
+    }
+
+    fun particle( name: String, particle: DefaultParticleType ) {
+
+        val id = id(name);          register( PARTICLE_TYPE, id, particle )
+    }
+
+    fun fuel( item: Item, time: Int ) { FuelRegistry.INSTANCE.add( item, time ) }
 
 }

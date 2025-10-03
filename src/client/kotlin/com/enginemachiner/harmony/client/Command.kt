@@ -1,43 +1,38 @@
 package com.enginemachiner.harmony.client
 
-import com.enginemachiner.harmony.MOD_NAME
-import com.mojang.brigadier.CommandDispatcher
+import com.enginemachiner.harmony.Command
+import com.enginemachiner.harmony.CommandSetup
+import com.enginemachiner.harmony.HarmonyArgumentBuilder
 import com.mojang.brigadier.arguments.ArgumentType
-import com.mojang.brigadier.builder.LiteralArgumentBuilder
-import com.mojang.brigadier.builder.RequiredArgumentBuilder
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
+import com.mojang.brigadier.tree.CommandNode
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 
-typealias ClientLiteral = LiteralArgumentBuilder<FabricClientCommandSource>
-typealias ClientArgument = RequiredArgumentBuilder<FabricClientCommandSource, out Any>
-private typealias OnClientRegister = (dispatcher: CommandDispatcher<FabricClientCommandSource>, main: ClientLiteral ) -> Unit
+private typealias ClientCommandType = Command<FabricClientCommandSource, ClientCommand>
+private typealias Builder = HarmonyArgumentBuilder<FabricClientCommandSource>
+private typealias Setup = CommandSetup<ClientCommand>
 
-object Command {
+fun clientCommand( name: String, setup: Setup ) = ClientCommand(name).apply(setup).build()
 
-    object Client {
+class ClientCommand( builder: Builder ) : ClientCommandType(builder) {
 
-        private val event = ClientCommandRegistrationCallback.EVENT
+    constructor( name: String ) : this( literal(name) )
+    constructor( name: String, type: ArgumentType<*> ) : this( argument(name, type) )
 
-        fun register( onRegister: OnClientRegister ) {
+    override fun literal( name: String, setup: Setup ): ClientCommand {
 
-            event.register { dispatcher, _ ->
+        val child = ClientCommand(name).apply(setup);          builder.then( child.builder )
 
-                val main = ClientCommandManager.literal(MOD_NAME)
+        return this
 
-                onRegister( dispatcher, main )
+    }
 
-            }
+    override fun argument( name: String, type: ArgumentType<*>, setup: Setup ): ClientCommand {
 
-        }
+        val child = ClientCommand(name, type).apply(setup);          builder.then( child.builder )
 
-        fun literal( s: String ): ClientLiteral { return ClientCommandManager.literal(s) }
-
-        fun argument(type: ArgumentType<*>, name: String = "" ): ClientArgument {
-
-            return ClientCommandManager.argument( name, type )
-
-        }
+        return this
 
     }
 

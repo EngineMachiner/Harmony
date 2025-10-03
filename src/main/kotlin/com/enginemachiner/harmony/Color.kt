@@ -1,13 +1,11 @@
 package com.enginemachiner.harmony
 
 import java.awt.Color
+import java.awt.Color.getHSBColor
 import kotlin.random.Random
 
-fun randomColor(): Color {
+fun randomColor( saturation: Float = 1f, brightness: Float = 1f ): Color {
 
-    val h = Random.nextInt( 100 + 1 ) * 0.01f
-    val b = Random.nextInt( 75, 100 + 1 ) * 0.01f
-
-    return Color.getHSBColor( h, 1f, b )
+    val hue = Random.nextFloat();               return getHSBColor( hue, saturation, brightness )
 
 }

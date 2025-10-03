@@ -1,62 +1,47 @@
 package com.enginemachiner.harmony.client
 
 import com.enginemachiner.harmony.randomColor
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.client.particle.*
+import net.minecraft.client.particle.ParticleTextureSheet.PARTICLE_SHEET_OPAQUE
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.particle.DefaultParticleType
 import net.minecraft.particle.ParticleEffect
 import net.minecraft.util.math.Vec3d
+import net.minecraft.util.math.Vec3d.ZERO
 
-object Particles {
+fun ParticleManager.addParticle( particle: ParticleEffect, pos: Vec3d, delta: Vec3d = ZERO ): Particle? {
 
-    fun spawnOne( particle: ParticleEffect, pos: Vec3d, delta: Vec3d = Vec3d.ZERO ): Particle? {
-
-        world() ?: return null;         val manager = client().particleManager
-
-        return manager.addParticle( particle, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z )
-
-    }
+    return addParticle( particle, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z )
 
 }
 
-open class SimpleParticle( clientWorld: ClientWorld, x: Double, y: Double, z: Double ) : SpriteBillboardParticle( clientWorld, x, y, z ) {
-
-    init { wrap() };     private fun wrap() { init() };    open fun init() {}
+open class HarmonyParticle( world: ClientWorld, pos: Vec3d ) : SpriteBillboardParticle( world, pos.x, pos.y, pos.z ) {
 
     fun setRandomColor() {
 
-        val color = randomColor().getColorComponents(null)
-
-        setColor( color[0], color[1], color[2] )
+        val color = randomColor().getColorComponents(null);             setColor( color[0], color[1], color[2] )
 
     }
 
-    override fun getType(): ParticleTextureSheet { return ParticleTextureSheet.PARTICLE_SHEET_OPAQUE }
+    override fun getType(): ParticleTextureSheet = PARTICLE_SHEET_OPAQUE
 
     companion object {
 
-        @Environment(EnvType.CLIENT)
-        abstract class Factory( private var provider: SpriteProvider ) : ParticleFactory<DefaultParticleType> {
+        abstract class Factory( private val provider: SpriteProvider ) : ParticleFactory<DefaultParticleType> {
 
-            open fun template( world: ClientWorld, x: Double, y: Double, z: Double ): SpriteBillboardParticle {
-                return SimpleParticle(world, x, y, z)
-            }
+            open fun template( world: ClientWorld, pos: Vec3d ) = HarmonyParticle( world, pos )
 
             override fun createParticle(
 
-                parameters: DefaultParticleType, world: ClientWorld,
-
-                x: Double, y: Double, z: Double,
+                parameters: DefaultParticleType,    world: ClientWorld,         x: Double, y: Double, z: Double,
 
                 velocityX: Double, velocityY: Double, velocityZ: Double
 
             ): Particle {
 
-                val particle = template(world, x, y, z);        particle.setSprite(provider)
+                val pos = Vec3d(x, y, z);           val particle = template(world, pos)
 
-                return particle
+                particle.setSprite(provider);           return particle
 
             }
 

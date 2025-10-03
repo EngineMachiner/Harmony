@@ -1,176 +1,133 @@
 package com.enginemachiner.harmony
 
-import com.enginemachiner.harmony.ModItemGroup.itemGroup
-import net.minecraft.entity.Entity
-import net.minecraft.entity.EquipmentSlot
+import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.*
 import net.minecraft.item.Item
 import net.minecraft.item.Item.Settings
+import net.minecraft.item.ItemGroup
 import net.minecraft.item.ToolItem
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.Hand
-import net.minecraft.util.registry.Registry
-import net.minecraft.world.World
+import net.minecraft.util.Identifier
+import net.minecraft.util.math.MathHelper.nextFloat
+import net.minecraft.util.math.random.Random
+import net.minecraft.util.registry.Registry.ITEM
 import java.awt.Color
-import kotlin.random.Random
-import kotlin.reflect.KClass
 
-val hands = arrayOf( Hand.MAIN_HAND, Hand.OFF_HAND )
+fun simpleItemGroup( id: Identifier,    item: Item = defaultItem ): ItemGroup {
 
-fun handItem( player: PlayerEntity, kClass: KClass<*> ): ItemStack {
+    val stack = item.defaultStack
 
-    return player.handItems.find { kClass.isInstance( it.item ) }!!
+    return FabricItemGroupBuilder.create(id).icon { stack }.build()
 
 }
 
+private val defaultItem = Item( Settings() )
 
-private val equipment = arrayOf( EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND )
+internal fun Mod.itemGroup(): ItemGroup {
 
-fun breakEquipment( entity: LivingEntity, stack: ItemStack ) {
-
-    val index = NBT.nbt(stack).getInt("Hand")
-
-    entity.sendEquipmentBreakStatus( equipment[index] )
+    val id = identifiers.itemGroup;         return simpleItemGroup(id)
 
 }
 
-
-private val registry = Registry.ITEM
-
-fun modItem( kClass: KClass<*> ): Item {
-
-    val className = ModID.className(kClass);        return modItem(className)
-
-}
-
-fun modItem(id: String): Item { val id = modID(id);     return registry.get(id) }
-
-fun isModItem(stack: ItemStack): Boolean {
-
-    return registry.getId( stack.item ).namespace == MOD_NAME
-
-}
-
-
-fun modItemSettings( maxCount: Int = 1 ): Settings {
+fun Mod.itemSettings( maxCount: Int = 1 ): Settings {
 
     return Settings().group(itemGroup).maxCount(maxCount)
 
 }
 
+/** Checks if the item is from a Harmony mod. */
+fun Item.isFrom( mod: Mod ): Boolean {
 
-interface ColorItem {
-
-    /** Puts the color in the NBT. */
-    fun setColor( nbt: NbtCompound ): NbtCompound {
-
-        nbt.putInt( "Color", color().rgb );     return nbt
-
-    }
-
-    open fun color(): Color {
-
-        val h = Random.nextInt( 100 + 1 ) * 0.01f
-        val b = Random.nextInt( 75, 100 + 1 ) * 0.01f
-
-        return Color.getHSBColor( h, 0.35f, b )
-
-    }
+    val id = ITEM.getId(this);          return id.namespace == mod.name
 
 }
 
+/** Checks if the stack item is from a Harmony mod. */
+fun ItemStack.isFrom( mod: Mod ) = item.isFrom(mod)
 
-interface StackScreen {
+fun ItemStack.damage( entity: LivingEntity, hand: Hand, damage: Int = 1 ) {
 
-    fun canOpenScreen( player: PlayerEntity, stack: ItemStack ): Boolean {
+    val equipmentSlot = hand.toEquipmentSlot()
 
-        val handStack = player.handItems.find { it != stack }!!
-
-        return handStack.item is AirBlockItem
-
-    }
+    damage( damage, entity ) { entity.sendEquipmentBreakStatus(equipmentSlot) }
 
 }
 
+/**
+ * Interface to create a NBT compound under the mod's name
+ * to prevent conflicts between different mods.
+ */
+interface ModItem {
 
-/** Gets the stack holder as a player. */
-fun player( stack: ItemStack ): PlayerEntity { return stack.holder as PlayerEntity }
+    val mod: Mod
 
-/** Damage the stack. */
-fun damage( stack: ItemStack, damage: Int = 1, entity: LivingEntity = player(stack) ) {
+    fun ItemStack.init(): ItemStack {
 
-    stack.damage( damage, entity ) { breakEquipment( it, stack ) }
+        val nbt = NbtCompound();            val name = mod.name
+
+        orCreateNbt.put( name, nbt );           return this
+
+    }
+
+    fun ItemStack.modNBT(): NbtCompound {
+
+        val name = mod.name;            return nbt!!.getCompound(name)
+
+    }
+
+    open fun onInventoryChange( oldStack: ItemStack, newStack: ItemStack ) {}
 
 }
 
-/** Adds tracking and NBT setup to items. */
-interface HarmonyItem {
+abstract class Item( settings: Settings ) : Item(settings), ModItem {
 
-    fun tick( stack: ItemStack, world: World, entity: Entity, slot: Int ) {
+    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ) = false
 
-        trackHolder(stack, entity)
+    override fun getDefaultStack() = super.getDefaultStack().init()
 
-        if ( world.isClient ) return;       trackTick(stack, slot)
+}
 
-        if ( !NBT.has(stack) ) setupNBT(stack);         clean(stack)
+abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), ModItem {
 
-    }
+    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ) = false
 
+    override fun getDefaultStack() = super.getDefaultStack().init()
 
-    fun trackHolder( stack: ItemStack, holder: Entity ) { Companion.trackHolder(stack, holder) }
+}
 
-    fun trackTick( stack: ItemStack, slot: Int ) {}
+/** An interface that provides color handling capabilities for items. */
+interface ColorItem : ModItem {
 
+    /** Returns the color to be set in the NBT. */
+    fun color(): Color {
 
-    open fun getSetupNBT( stack: ItemStack ): NbtCompound { return NbtCompound() }
+        val saturation = 0.35f;             val brightness = randomBrightness()
 
-    fun setupNBT(stack: ItemStack) {
-
-        val nbt = stack.nbt!!;      nbt.put( MOD_NAME, getSetupNBT(stack) )
-
-    }
-
-
-    /** Clean unnecessary data if the player has the stack. */
-    open fun clean(stack: ItemStack) {
-
-        val nbt = NBT.nbt(stack);       if ( !nbt.contains("BlockPos") ) return
-
-        nbt.remove("BlockPos");     nbt.remove("Slot")
+        return randomColor( saturation, brightness )
 
     }
 
-    companion object {
+    /** Returns the color stored in the mod NBT. */
+    fun color( stack: ItemStack ) = stack.modNBT().getInt("color")
 
-        fun trackHolder( stack: ItemStack, holder: Entity? ) {
+    /** Sets the color. This function is to be used when overriding getDefaultStack(). */
+    fun ItemStack.setColor(): ItemStack {
 
-            if ( stack.holder == holder ) return
+        val color = color().rgb;        modNBT().putInt( "color", color );       return this
 
-            stack.holder = holder
+    }
+
+    private companion object {
+
+        fun randomBrightness(): Float {
+
+            val random = Random.create();           return nextFloat( random, 0.75f, 1f )
 
         }
 
     }
-
-}
-
-
-private interface Harmony : HarmonyItem, ModID
-
-abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem( material, settings ), Harmony {
-
-    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
-
-    override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) { tick( stack, world, entity, slot ) }
-
-}
-
-abstract class Item(settings: Settings) : Item(settings), Harmony {
-
-    override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ): Boolean { return false }
-
-    override fun inventoryTick( stack: ItemStack, world: World, entity: Entity, slot: Int, selected: Boolean ) { tick( stack, world, entity, slot ) }
 
 }

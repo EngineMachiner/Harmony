@@ -1,13 +1,15 @@
 package com.enginemachiner.harmony
 
-import org.slf4j.LoggerFactory
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory.getLogger
 
-/** Verify logic or methods if they are based on vanilla behavior, etc. */
-annotation class BasedOn( val reason: String )
+class Debug( mod: Mod ) {
 
-private val logger = LoggerFactory.getLogger(MOD_TITLE)
+    private val name = mod.name;            val logger: Logger = getLogger(name)
 
-fun modPrint( a: Any? ) { logger.info("$a") }
+    fun print( a: Any? ) { logger.info("$a") }
 
-@JvmField   /** Meant to be used on Java. */
-val modPrint: (String) -> Unit = ::modPrint
+    @JvmField // For Java.
+    val print: (String) -> Unit = ::print
+
+}
