@@ -26,10 +26,6 @@ interface HarmonyInventory : SidedInventory {
 
     override fun size() = items().size
 
-    /**
-     * Checks if the inventory is empty.
-     * @return true if this inventory has only empty stacks, false otherwise.
-     */
     override fun isEmpty() = items().all { it.isEmpty }
 
     override fun getStack( slot: Int ) = items()[slot]
@@ -45,13 +41,6 @@ interface HarmonyInventory : SidedInventory {
     override fun canInsert( slot: Int, stack: ItemStack, direction: Direction? ) = true
     override fun canExtract( slot: Int, stack: ItemStack, direction: Direction ) = true
 
-    /**
-     * Replaces the current stack in an inventory slot with the provided stack.
-     * @param slot  The inventory slot of which to replace the item stack.
-     * @param stack The replacing item stack. If the stack is too big for
-     *              this inventory max count,
-     *              it gets resized to this inventory's maximum amount.
-     */
     override fun setStack( slot: Int, stack: ItemStack ) {
 
         val max = maxCountPerStack;             items()[slot] = stack
@@ -60,22 +49,12 @@ interface HarmonyInventory : SidedInventory {
 
     }
 
-    /**
-     * Removes items from an inventory slot.
-     * @param slot  The slot to remove from.
-     * @param count How many items to remove. If there are less items in the slot than what are requested,
-     *              takes all items in that slot.
-     */
     override fun removeStack( slot: Int, amount: Int ): ItemStack {
 
         return Inventories.splitStack( items(), slot, amount )
 
     }
 
-    /**
-     * Removes all items from an inventory slot.
-     * @param slot The slot to remove from.
-     */
     override fun removeStack( slot: Int ): ItemStack {
 
         return Inventories.removeStack( items(), slot )
@@ -84,6 +63,13 @@ interface HarmonyInventory : SidedInventory {
 
 }
 
+/**
+ * An inventory stored within an ItemStack's NBT data.
+ * Useful for items that contain other items (e.g., backpacks, shulker boxes).
+ *
+ * @param stack The ItemStack that stores this inventory.
+ * @param size The number of slots in this inventory.
+ */
 open class StackInventory( val stack: ItemStack, size: Int ) : HarmonyInventory {
 
     private val items = DefaultedList.ofSize( size, ItemStack.EMPTY )

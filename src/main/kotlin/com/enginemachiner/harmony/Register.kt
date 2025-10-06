@@ -22,6 +22,10 @@ import net.minecraft.util.registry.Registry.register
 
 private typealias BlockEntityConstructor = (BlockPos, BlockState) -> BlockEntity
 
+/**
+ * Handles registration for the mod.
+ * Provides convenient methods to register items, blocks, entities, sounds, etc.
+ */
 class Register( private val mod: Mod ) {
 
     private fun id( path: String ) = mod.id(path)
@@ -32,8 +36,17 @@ class Register( private val mod: Mod ) {
 
     }
 
+    /** Contains a registered block and its corresponding item. */
     data class RegisteredBlock( val block: Block, val item: Item )
 
+    /**
+     * Registers a block and its corresponding block item.
+     *
+     * @param name The block's registry name.
+     * @param block The block to register.
+     * @param settings The item settings for the block item.
+     * @return A RegisteredBlock containing both the block and item.
+     */
     fun block( name: String, block: Block, settings: Item.Settings ): RegisteredBlock {
 
         val id = id(name);            val block = register( BLOCK, id, block )
@@ -44,6 +57,14 @@ class Register( private val mod: Mod ) {
 
     }
 
+    /**
+     * Registers a block entity type.
+     *
+     * @param name The block entity's registry name.
+     * @param constructor The constructor for creating block entity instances.
+     * @param blocks The blocks that can have this block entity.
+     * @return The registered block entity type.
+     */
     fun blockEntity( name: String, constructor: BlockEntityConstructor, vararg blocks: Block ): BlockEntityType<BlockEntity> {
 
         val id = id(name);          val type = FabricBlockEntityTypeBuilder.create( constructor, *blocks ).build()
@@ -71,6 +92,7 @@ class Register( private val mod: Mod ) {
         val id = id(name);          register( PARTICLE_TYPE, id, particle )
     }
 
+    /** Registers an item as fuel. The burn time is in ticks. */
     fun fuel( item: Item, time: Int ) { FuelRegistry.INSTANCE.add( item, time ) }
 
 }

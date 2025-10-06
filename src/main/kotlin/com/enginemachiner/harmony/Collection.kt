@@ -7,8 +7,7 @@ package com.enginemachiner.harmony
  * @param value The element to start from
  * @param offset The number of positions to move (positive or negative)
  * @return The element at the calculated position
- * @throws NoSuchElementException if the collection is empty
- * @throws NoSuchElementException if the collection doesn't contain the specified [value]
+ * @throws NoSuchElementException if the collection is empty or the collection doesn't contain the specified [value]
  *
  */
 fun <T> Collection<T>.cycle( value: T, offset: Int = 1 ): T {

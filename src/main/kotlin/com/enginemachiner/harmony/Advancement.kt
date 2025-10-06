@@ -8,9 +8,13 @@ import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import java.util.function.Consumer
 
-/** Advancement builder for custom advancements in Data Generation. */
+/**
+ * Abstract builder to create custom advancements when generating data.
+ * Provides a structured way to define advancement properties and to build them.
+ */
 abstract class AdvancementBuilder {
 
+    /** Set after calling [build]. */
     lateinit var advancement: Advancement
 
     open val parent: AdvancementBuilder? = null
@@ -27,6 +31,10 @@ abstract class AdvancementBuilder {
     abstract val criterion: String
     abstract val conditions: CriterionConditions
 
+    /**
+     * Hook for additional builder configuration.
+     * Override to add custom criteria or other builder settings.
+     */
     open fun configureBuilder( builder: Advancement.Builder ) {}
 
     abstract fun id(): String
@@ -51,8 +59,15 @@ abstract class AdvancementBuilder {
 
 }
 
+/** Advancement builder factory for a specific mod. */
 class ModAdvancement( private val mod: Mod ) {
 
+    /**
+     * Base builder for mod-specific advancements.
+     * Automatically configures title, description, and ID based on the mod and path.
+     *
+     * @param path The advancement path within the mod namespace.
+     */
     abstract inner class Builder( val path: String ) : AdvancementBuilder() {
 
         val translation = mod.translation.advancement

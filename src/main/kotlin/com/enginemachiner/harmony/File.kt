@@ -11,6 +11,7 @@ import kotlin.reflect.full.createInstance
 
 private val LOADER: FabricLoader = FabricLoader.getInstance()
 
+/** Checks if a path exists and returns it, or null if it doesn't. */
 private fun existingPath( parent: String, child: String ): String? {
 
     val isEmpty = child.isEmpty();          val file = if (isEmpty) File(parent) else File( parent, child )
@@ -43,22 +44,33 @@ fun envPath( path: String ): String {
 
 }
 
+/**
+ * Provides secure file access within a mod's directory.
+ * Prevents path traversal attacks by validating paths stay within the mod directory.
+ */
 class SecureFileAccessor( mod: Mod, userPath: String ) {
 
     private val id = mod.id
 
+    /** The root path for this mod's files. */
     val path: Path = LOADER.gameDir.resolve(id)
 
     private val resolvedPath = path.resolve( userPath ).normalize()
 
+    /** The canonical (real) path after resolving symlinks and normalizing. */
     val canonicalPath: Path = resolvedPath.toRealPath()
 
+    /** Returns true if the path is valid and within the mod directory. */
     fun isValid(): Boolean = canonicalPath.startsWith(path)
 
     fun toFile(): File = canonicalPath.toFile()
 
 }
 
+/**
+ * Manages configuration files for a mod.
+ * Handles loading, saving, and creating config files with default values.
+ */
 class ConfigManager( mod: Mod ) {
 
     private val id = mod.id
@@ -69,6 +81,7 @@ class ConfigManager( mod: Mod ) {
 
     private fun path( fileName: String ) = directory.resolve("$fileName.json")
 
+    /** Creates a new config file with default values. */
     private fun <T: Any> create( fileName: String, defaults: KClass<T> ): T {
 
         val data = defaults.createInstance();           save( fileName, data )
@@ -119,10 +132,18 @@ class ConfigManager( mod: Mod ) {
 
 }
 
+/** Provides file and configuration management utilities for a mod. */
 class File( private val mod: Mod ) {
 
+    /**
+     * Creates a secure file accessor for the given path.
+     *
+     * @param userPath The user-provided path to access.
+     * @return A SecureFileAccessor instance.
+     */
     fun secureAccessor( userPath: String ) = SecureFileAccessor( mod, userPath )
 
+    /** The configuration manager for this mod. */
     val configManager = ConfigManager(mod)
 
 }

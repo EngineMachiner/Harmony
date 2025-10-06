@@ -16,6 +16,15 @@ import net.minecraft.util.math.random.Random
 import net.minecraft.util.registry.Registry.ITEM
 import java.awt.Color
 
+private val defaultItem = Item( Settings() )
+
+/**
+ * Creates a simple item group with the given identifier and icon.
+ *
+ * @param id The identifier for the item group.
+ * @param item The item to use as the icon.
+ * @return The created ItemGroup.
+ */
 fun simpleItemGroup( id: Identifier,    item: Item = defaultItem ): ItemGroup {
 
     val stack = item.defaultStack
@@ -23,8 +32,6 @@ fun simpleItemGroup( id: Identifier,    item: Item = defaultItem ): ItemGroup {
     return FabricItemGroupBuilder.create(id).icon { stack }.build()
 
 }
-
-private val defaultItem = Item( Settings() )
 
 internal fun Mod.itemGroup(): ItemGroup {
 
@@ -64,6 +71,11 @@ interface ModItem {
 
     val mod: Mod
 
+    /**
+     * Initializes this ItemStack with a mod-specific NBT compound.
+     *
+     * @return This ItemStack for chaining.
+     */
     fun ItemStack.init(): ItemStack {
 
         val nbt = NbtCompound();            val name = mod.name
@@ -72,16 +84,31 @@ interface ModItem {
 
     }
 
+    /**
+     * Retrieves the mod-specific NBT compound from this ItemStack.
+     *
+     * @return The mod's NBT compound.
+     */
     fun ItemStack.modNBT(): NbtCompound {
 
         val name = mod.name;            return nbt!!.getCompound(name)
 
     }
 
+    /**
+     * Called when this item's stack changes in an inventory.
+     *
+     * @param oldStack The previous ItemStack.
+     * @param newStack The new ItemStack.
+     */
     open fun onInventoryChange( oldStack: ItemStack, newStack: ItemStack ) {}
 
 }
 
+/**
+ * Base class for Harmony mod items.
+ * Automatically initializes mod-specific NBT and disables NBT update animations.
+ */
 abstract class Item( settings: Settings ) : Item(settings), ModItem {
 
     override fun allowNbtUpdateAnimation( player: PlayerEntity, hand: Hand, oldStack: ItemStack, newStack: ItemStack ) = false
@@ -101,8 +128,11 @@ abstract class ToolItem( material: ToolMaterial, settings: Settings ) : ToolItem
 /** An interface that provides color handling capabilities for items. */
 interface ColorItem : ModItem {
 
-    /** Returns the color to be set in the NBT. */
-    fun color(): Color {
+    /**
+     * Returns the color to be set in the NBT.
+     * Generates a random color with fixed saturation and random brightness.
+     */
+    fun randomColor(): Color {
 
         val saturation = 0.35f;             val brightness = randomBrightness()
 
@@ -110,13 +140,17 @@ interface ColorItem : ModItem {
 
     }
 
-    /** Returns the color stored in the mod NBT. */
     fun color( stack: ItemStack ) = stack.modNBT().getInt("color")
 
-    /** Sets the color. This function is to be used when overriding getDefaultStack(). */
+    /**
+     * Sets the color in this ItemStack's NBT.
+     * This function is to be used when overriding getDefaultStack().
+     *
+     * @return This ItemStack for chaining.
+     */
     fun ItemStack.setColor(): ItemStack {
 
-        val color = color().rgb;        modNBT().putInt( "color", color );       return this
+        val color = randomColor().rgb;        modNBT().putInt( "color", color );       return this
 
     }
 

@@ -6,16 +6,33 @@ import net.minecraft.util.math.MathHelper.lerpAngleDegrees
 import java.awt.Color
 import java.awt.Color.RGBtoHSB
 
+/**
+ * Base interface for objects that can be animated over time.
+ */
 interface Tweenable {
 
-    fun restart();          fun isDone(): Boolean
+    /** Restarts the animation from the beginning. */
+    fun restart()
 
-    fun delay( delay: Float );          fun update( delta: Float )
+    /** Returns true if the animation has completed. */
+    fun isDone(): Boolean
+
+    /** Sets a delay in seconds before the animation starts. */
+    fun delay( delay: Float )
+
+    /** Updates the animation by the given delta time in ticks. */
+    fun update( delta: Float )
 
 }
 
-// Duration in seconds.
-
+/**
+ * Interpolates a value from [start] to [end] over a specified [duration].
+ *
+ * @param start The starting value.
+ * @param end The ending value.
+ * @param duration The duration of the tween in seconds.
+ * @param easing The easing enum to apply to the interpolation.
+ */
 open class Tween(
 
     private val start: Float,           private val end: Float,
@@ -27,14 +44,22 @@ open class Tween(
 
     override fun delay( delay: Float ) { this.delay = delay }
 
+    /**
+     * Returns the current progress of the tween as a value between 0 and 1.
+     */
     fun progress(): Float {
 
         var t = time - delay;           t = t.coerceIn( 0f, 1f );           return t / duration
 
     }
 
+    /**
+     * Interpolates between start and end values using the given progress [t].
+     * Can be overridden for custom interpolation behavior.
+     */
     open fun interpolate( t: Float ) = lerp( t, start, end )
 
+    /** Returns the current interpolated value with easing applied. */
     fun value(): Float {
 
         var t = progress();         t = easing.calculate(t);         return interpolate(t)
@@ -47,6 +72,10 @@ open class Tween(
 
 }
 
+/**
+ * A specialized tween for interpolating angles in degrees.
+ * Uses angular interpolation to handle wrapping around 360 degrees correctly.
+ */
 class AngleTween(
 
     private val start: Float,           private val end: Float,
@@ -58,6 +87,10 @@ class AngleTween(
     
 }
 
+/**
+ * A tween for smoothly interpolating between two colors in HSB color space.
+ * Interpolates hue as an angle for smooth color transitions.
+ */
 class ColorTween(
 
     start: Color,               end: Color,
@@ -65,7 +98,6 @@ class ColorTween(
 
 ) : Tweenable {
 
-    // The hue is in range [0, 1] for RGBtoHSB() and lerpAngleDegrees() will work fine with it.
     private val startHSB = RGBtoHSB( start.red, start.green, start.blue, null )
     private val endHSB = RGBtoHSB( end.red, end.green, end.blue, null )
 
@@ -75,6 +107,7 @@ class ColorTween(
 
     private val group = TweenGroup( hue, saturation, brightness )
 
+    /** Returns the current interpolated color. */
     fun value(): Color {
 
         val hue = hue.value()
@@ -93,10 +126,20 @@ class ColorTween(
 
 }
 
+/**
+ * Groups multiple tweens to run simultaneously.
+ * The group is considered done when all tweens are done.
+ *
+ * @param tweens The tweens to group together.
+ */
 class TweenGroup( vararg tweens: Tweenable ) : Tweenable {
 
     private val tweens = tweens.toMutableList()
 
+    /**
+     * Adds additional tweens to this group.
+     * @return This group for method chaining.
+     */
     fun add( vararg tween: Tweenable ): TweenGroup { tweens.addAll(tween); return this }
 
     override fun delay( delay: Float ) { tweens.forEach { it.delay(delay) } }
@@ -109,17 +152,29 @@ class TweenGroup( vararg tweens: Tweenable ) : Tweenable {
 
 }
 
+/**
+ * Runs multiple tweens in sequence, one after another.
+ * Each tween starts when the previous one completes.
+ *
+ * @param tweens The tweens to run in sequence.
+ */
 class TweenSequence( vararg tweens: Tweenable ) : Tweenable {
 
+    /**
+     * Returns the currently active tween in the sequence.
+     */
     fun currentTween() = tweens[i]
 
     private var i = 0;          private val tweens = tweens.toMutableList()
 
+    /**
+     * Adds additional tweens to run after the current sequence.
+     * @return This sequence for method chaining.
+     */
     fun then( vararg tween: Tweenable ): TweenSequence { tweens.addAll(tween); return this }
 
     override fun delay( delay: Float ) { currentTween().delay(delay) }
 
-    // Move to next tween when current tween is done.
     override fun update( delta: Float ) {
 
         if ( isDone() ) return;         val tween = currentTween()

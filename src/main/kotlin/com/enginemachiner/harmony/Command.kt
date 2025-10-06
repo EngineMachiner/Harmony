@@ -24,6 +24,7 @@ typealias CommandSetup<V> = V.() -> Unit
 private typealias Builder<T> = HarmonyArgumentBuilder<T>
 private typealias Setup<V> = CommandSetup<V>
 
+/** Represents a generic command. */
 abstract class Command<T, V>( val builder: Builder<T> ) {
 
     fun build(): CommandNode<T> = builder.build()
@@ -68,6 +69,12 @@ private typealias ServerCommandType = Command<ServerCommandSource, ServerCommand
 private typealias ServerBuilder = Builder<ServerCommandSource>
 private typealias ServerSetup = Setup<ServerCommand>
 
+/**
+ * Creates and configures a server-side command.
+ * @param name The name of the command
+ * @param setup The setup lambda to configure the command
+ * @return A configured CommandNode for registration
+ */
 fun serverCommand( name: String, setup: ServerSetup ) = ServerCommand(name).apply(setup).build()
 
 class ServerCommand( builder: ServerBuilder ) : ServerCommandType(builder) {

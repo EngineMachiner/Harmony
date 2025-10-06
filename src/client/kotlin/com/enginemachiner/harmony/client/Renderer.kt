@@ -11,6 +11,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemConvertible
 import java.awt.Color
 
+/** Sets the shader color for rendering. */
 fun setShaderColor( color: Color ) {
 
     val color = color.getRGBComponents(null);           color.forEachIndexed { i, value -> color[i] = value / 255f }

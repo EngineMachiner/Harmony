@@ -12,10 +12,18 @@ import net.minecraft.network.PacketByteBuf
 /** Checks if the client has a network handler. */
 fun MinecraftClient.isConnected() = networkHandler != null
 
+/** Manages client-side networking for packet sending and receiving. */
 class ClientNetworking( private val mod: Mod ) {
 
     private fun id( path: String ) = mod.id(path)
 
+    /**
+     * Registers a receiver for deserialized packets.
+     *
+     * @param path The packet identifier path.
+     * @param packet The packet instance to deserialize into
+     * @param handler The handler lambda with deserialized packet context
+     */
     fun <T: Packet> receive( path: String, packet: T, handler: DeserializedContext<T>.() -> Unit ) {
 
         val id = id(path)
@@ -28,6 +36,7 @@ class ClientNetworking( private val mod: Mod ) {
 
     }
 
+    /** Sends a packet to the server. */
     fun send( path: String, packet: Packet ) {
 
         val id = id(path);              val buf = packet.write();               ClientPlayNetworking.send( id, buf )
@@ -35,6 +44,11 @@ class ClientNetworking( private val mod: Mod ) {
     }
 
 
+    /**
+     * Registers a receiver for raw packet buffers.
+     * @param buf The packet buffer (unused in registration, context provides actual buffer)
+     * @param handler The handler lambda with raw buffer context
+     */
     fun receive( path: String, buf: PacketByteBuf, handler: RawContext.() -> Unit ) {
 
         val id = id(path)
@@ -47,6 +61,7 @@ class ClientNetworking( private val mod: Mod ) {
 
     }
 
+    /** Sends a raw packet buffer to the server. */
     fun send( path: String, buf: PacketByteBuf ) {
 
         val id = id(path);              ClientPlayNetworking.send( id, buf )

@@ -11,6 +11,13 @@ class KeybindsManager( mod: Mod ) {
 
     private val id = mod.id
 
+    /**
+     * Creates and configures a key binding.
+     * @param subKey The key identifier suffix
+     * @param subCategory The category identifier suffix
+     * @param code The default key code (default: UNKNOWN)
+     * @param type The input type (default: KEYSYM)
+     */
     inner class Binder( subKey: String, subCategory: String, code: Int = Keys.UNKNOWN, type: InputUtil.Type = KEYSYM ) {
 
         val key = "key.$id.$subKey";             val category = "category.$id.$subCategory"
@@ -23,6 +30,7 @@ class KeybindsManager( mod: Mod ) {
 
 }
 
+/** Key code constants for common keyboard keys. */
 object Keys {
 
     const val F1 = GLFW.GLFW_KEY_F1

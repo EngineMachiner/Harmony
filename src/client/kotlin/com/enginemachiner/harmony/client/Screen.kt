@@ -1,11 +1,8 @@
 package com.enginemachiner.harmony.client
 
-import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.systems.RenderSystem.setShaderColor
 import com.mojang.blaze3d.systems.RenderSystem.setShaderTexture
-import net.minecraft.client.gui.DrawableHelper
 import net.minecraft.client.gui.DrawableHelper.drawTexture
-import net.minecraft.client.gui.widget.*
+import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.text.OrderedText
 import net.minecraft.text.Text
@@ -27,7 +24,7 @@ interface Positionable {
 
 }
 
-// It trims by default.
+/** Wrapper for clickable widgets with automatic text trimming. */
 open class Widget( initPos: Vec2f, initSize: Vec2f, message: Text, val widget: ClickableWidget ) : Positionable {
 
     override var pos = initPos;         var size = initSize;            override fun size() = size
@@ -64,6 +61,7 @@ open class Widget( initPos: Vec2f, initSize: Vec2f, message: Text, val widget: C
 
 }
 
+/** Rendering text with automatic line wrapping. */
 abstract class HarmonyText( initPos: Vec2f, initText: Text, maxWidth: Float? = null ) : Positionable {
 
     var text = initText;    set(value) { field = value;    refresh() }
