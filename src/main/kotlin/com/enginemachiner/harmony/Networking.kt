@@ -6,6 +6,7 @@ import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayNetworkHandler
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.util.Identifier
 
 /** Interface for serializable network packets. */
 interface Packet {
@@ -19,49 +20,45 @@ interface Packet {
 }
 
 /** Manages server-side networking for packet sending and receiving. */
-class ServerNetworking( private val mod: Mod ) {
-
-    private fun id( path: String ) = mod.id(path)
+object ServerNetworking {
 
     /**
      * Registers a receiver for deserialized packets.
      *
-     * @param path The packet identifier path.
-     * @param packet The packet instance to deserialize into
+     * @param id The packet identifier
+     * @param packet The packet factory or constructor
      * @param handler The handler lambda with deserialized packet context
      */
-    fun <T: Packet> receive( path: String, packet: T, handler: DeserializedContext<T>.() -> Unit ) {
-
-        val id = id(path)
+    fun <T: Packet> receive( id: Identifier, packet: () -> T, handler: DeserializedContext<T>.() -> Unit ) {
 
         ServerPlayNetworking.registerGlobalReceiver(id) { server, sender, networkHandler, buf, packetSender ->
 
-            packet.read(buf);           DeserializedContext( server, sender, networkHandler, packet, packetSender ).handler()
+            val packet = packet();          packet.read(buf)
+
+            DeserializedContext( server, sender, networkHandler, packet, packetSender ).handler()
 
         }
 
     }
 
     /** Sends a packet to a specific player. */
-    fun sendTo( player: ServerPlayerEntity, path: String, packet: Packet ) {
+    fun sendTo( player: ServerPlayerEntity, id: Identifier, packet: Packet ) {
 
-        val id = id(path);              val buf = packet.write();               ServerPlayNetworking.send( player, id, buf )
+        val buf = packet.write();               ServerPlayNetworking.send( player, id, buf )
 
     }
 
     /** Broadcasts a packet to a set of players. */
-    fun broadcast( players: Set<ServerPlayerEntity>, path: String, packet: Packet ) {
+    fun broadcast( players: Set<ServerPlayerEntity>, id: Identifier, packet: Packet ) {
 
-        val id = id(path);              val buf = packet.write()
-
-        players.forEach { ServerPlayNetworking.send( it, id, buf ) }
+        val buf = packet.write();           players.forEach { ServerPlayNetworking.send( it, id, buf ) }
 
     }
 
     /** Broadcasts a packet to all players on the server. */
-    fun broadcast( server: MinecraftServer, path: String, packet: Packet ) {
+    fun broadcast( server: MinecraftServer, id: Identifier, packet: Packet ) {
 
-        val id = id(path);              val buf = packet.write();           val players = server.playerManager.playerList
+        val buf = packet.write();           val players = server.playerManager.playerList
 
         players.forEach { ServerPlayNetworking.send( it, id, buf ) }
 
@@ -72,12 +69,10 @@ class ServerNetworking( private val mod: Mod ) {
      * Registers a receiver for raw packet buffers.
      * Use this for simple packets or when you need direct buffer control.
      *
-     * @param path The packet identifier path.
+     * @param id The packet identifier
      * @param handler The handler to process the raw packet buffer.
      */
-    fun receive( path: String, handler: RawContext.() -> Unit ) {
-
-        val id = id(path)
+    fun receive( id: Identifier, handler: RawContext.() -> Unit ) {
 
         ServerPlayNetworking.registerGlobalReceiver(id) { server, sender, networkHandler, buf, packetSender ->
 
@@ -88,44 +83,38 @@ class ServerNetworking( private val mod: Mod ) {
     }
 
     /** Sends a raw packet buffer to a specific player. */
-    fun sendTo( player: ServerPlayerEntity, path: String, buf: PacketByteBuf ) {
+    fun sendTo( player: ServerPlayerEntity, id: Identifier, buf: PacketByteBuf ) {
 
-        val id = id(path);              ServerPlayNetworking.send( player, id, buf )
+        ServerPlayNetworking.send( player, id, buf )
 
     }
 
     /** Broadcasts a raw packet buffer to a set of players. */
-    fun broadcast( players: Set<ServerPlayerEntity>, path: String, buf: PacketByteBuf ) {
-
-        val id = id(path);              players.forEach { ServerPlayNetworking.send( it, id, buf ) }
-
-    }
-
-    /** Broadcasts a raw packet buffer to all players on the server. */
-    fun broadcast( server: MinecraftServer, path: String, buf: PacketByteBuf ) {
-
-        val id = id(path);              val players = server.playerManager.playerList
+    fun broadcast( players: Set<ServerPlayerEntity>, id: Identifier, buf: PacketByteBuf ) {
 
         players.forEach { ServerPlayNetworking.send( it, id, buf ) }
 
     }
 
-    companion object {
+    /** Broadcasts a raw packet buffer to all players on the server. */
+    fun broadcast( server: MinecraftServer, id: Identifier, buf: PacketByteBuf ) {
 
-        /** Context for raw packet handlers with direct buffer access. */
-        data class RawContext(
-            val server: MinecraftServer,                                val sender: ServerPlayerEntity,
-            val networkHandler: ServerPlayNetworkHandler,               val buf: PacketByteBuf,
-            val packetSender: PacketSender
-        )
-
-        /** Context for deserialized packet handlers with typed packet access. */
-        data class DeserializedContext<T>(
-            val server: MinecraftServer,                                val sender: ServerPlayerEntity,
-            val networkHandler: ServerPlayNetworkHandler,               val packet: T,
-            val packetSender: PacketSender
-        )
+        val players = server.playerManager.playerList;          players.forEach { ServerPlayNetworking.send( it, id, buf ) }
 
     }
+
+    /** Context for raw packet handlers with direct buffer access. */
+    data class RawContext(
+        val server: MinecraftServer,                                val sender: ServerPlayerEntity,
+        val networkHandler: ServerPlayNetworkHandler,               val buf: PacketByteBuf,
+        val packetSender: PacketSender
+    )
+
+    /** Context for deserialized packet handlers with typed packet access. */
+    data class DeserializedContext<T>(
+        val server: MinecraftServer,                                val sender: ServerPlayerEntity,
+        val networkHandler: ServerPlayNetworkHandler,               val packet: T,
+        val packetSender: PacketSender
+    )
 
 }

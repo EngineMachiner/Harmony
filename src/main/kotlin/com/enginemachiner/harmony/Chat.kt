@@ -4,7 +4,7 @@ import net.minecraft.text.Text
 import net.minecraft.text.MutableText
 import net.minecraft.util.Formatting
 
-/** Provides chat message formatting utilities for a mod. */
+/** Provides chat message formatting utilities for the mod. */
 open class Chat( private val mod: Mod ) {
 
     /** Creates a formatted title prefix for chat messages. */

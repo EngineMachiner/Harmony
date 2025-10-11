@@ -33,18 +33,6 @@ fun simpleItemGroup( id: Identifier,    item: Item = defaultItem ): ItemGroup {
 
 }
 
-internal fun Mod.itemGroup(): ItemGroup {
-
-    val id = identifiers.itemGroup;         return simpleItemGroup(id)
-
-}
-
-fun Mod.itemSettings( maxCount: Int = 1 ): Settings {
-
-    return Settings().group(itemGroup).maxCount(maxCount)
-
-}
-
 /** Checks if the item is from a Harmony mod. */
 fun Item.isFrom( mod: Mod ): Boolean {
 
@@ -89,11 +77,7 @@ interface ModItem {
      *
      * @return The mod's NBT compound.
      */
-    fun ItemStack.modNBT(): NbtCompound {
-
-        val name = mod.name;            return nbt!!.getCompound(name)
-
-    }
+    fun ItemStack.modNBT() = mod.nbt(this)
 
     /**
      * Called when this item's stack changes in an inventory.

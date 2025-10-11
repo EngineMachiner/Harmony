@@ -1,57 +1,54 @@
 package com.enginemachiner.harmony.client
 
-import com.enginemachiner.harmony.Mod
 import com.enginemachiner.harmony.Packet
-import com.enginemachiner.harmony.id
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketSender
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.util.Identifier
 
 /** Checks if the client has a network handler. */
 fun MinecraftClient.isConnected() = networkHandler != null
 
 /** Manages client-side networking for packet sending and receiving. */
-class ClientNetworking( private val mod: Mod ) {
-
-    private fun id( path: String ) = mod.id(path)
+object ClientNetworking {
 
     /**
      * Registers a receiver for deserialized packets.
      *
-     * @param path The packet identifier path.
-     * @param packet The packet instance to deserialize into
+     * @param id The packet identifier
+     * @param packet The packet factory or constructor
      * @param handler The handler lambda with deserialized packet context
      */
-    fun <T: Packet> receive( path: String, packet: T, handler: DeserializedContext<T>.() -> Unit ) {
-
-        val id = id(path)
+    fun <T: Packet> receive( id: Identifier, packet: () -> T, handler: DeserializedContext<T>.() -> Unit ) {
 
         ClientPlayNetworking.registerGlobalReceiver(id) { client, networkHandler, buf, packetSender ->
 
-            packet.read(buf);           DeserializedContext( client, networkHandler, packet, packetSender ).handler()
+            val packet = packet();          packet.read(buf)
+
+            DeserializedContext( client, networkHandler, packet, packetSender ).handler()
 
         }
 
     }
 
     /** Sends a packet to the server. */
-    fun send( path: String, packet: Packet ) {
+    fun send( id: Identifier, packet: Packet ) {
 
-        val id = id(path);              val buf = packet.write();               ClientPlayNetworking.send( id, buf )
+        val buf = packet.write();               ClientPlayNetworking.send( id, buf )
 
     }
 
 
     /**
      * Registers a receiver for raw packet buffers.
+     *
+     * @param id The packet identifier
      * @param buf The packet buffer (unused in registration, context provides actual buffer)
      * @param handler The handler lambda with raw buffer context
      */
-    fun receive( path: String, buf: PacketByteBuf, handler: RawContext.() -> Unit ) {
-
-        val id = id(path)
+    fun receive( id: Identifier, buf: PacketByteBuf, handler: RawContext.() -> Unit ) {
 
         ClientPlayNetworking.registerGlobalReceiver(id) { client, networkHandler, buf, packetSender ->
 
@@ -62,24 +59,18 @@ class ClientNetworking( private val mod: Mod ) {
     }
 
     /** Sends a raw packet buffer to the server. */
-    fun send( path: String, buf: PacketByteBuf ) {
+    fun send( id: Identifier, buf: PacketByteBuf ) { ClientPlayNetworking.send( id, buf ) }
 
-        val id = id(path);              ClientPlayNetworking.send( id, buf )
+    /** Context for raw packet handlers with direct buffer access. */
+    data class RawContext(
+        val client: MinecraftClient,            val networkHandler: ClientPlayNetworkHandler,
+        val buf: PacketByteBuf,                 val packetSender: PacketSender
+    )
 
-    }
-
-    companion object {
-
-        data class RawContext(
-            val client: MinecraftClient,            val networkHandler: ClientPlayNetworkHandler,
-            val buf: PacketByteBuf,                 val packetSender: PacketSender
-        )
-
-        data class DeserializedContext<T>(
-            val client: MinecraftClient,            val networkHandler: ClientPlayNetworkHandler,
-            val packet: T,                          val packetSender: PacketSender
-        )
-
-    }
+    /** Context for deserialized packet handlers with typed packet access. */
+    data class DeserializedContext<T>(
+        val client: MinecraftClient,            val networkHandler: ClientPlayNetworkHandler,
+        val packet: T,                          val packetSender: PacketSender
+    )
 
 }

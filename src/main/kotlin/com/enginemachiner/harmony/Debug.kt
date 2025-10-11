@@ -3,8 +3,8 @@ package com.enginemachiner.harmony
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 
-/** Provides debugging and logging utilities for a mod. */
-class Debug( mod: Mod ) {
+/** Provides debugging and logging utilities for the mod. */
+open class Debug( mod: Mod ) {
 
     private val name = mod.name
     

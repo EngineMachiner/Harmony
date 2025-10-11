@@ -1,10 +1,7 @@
 package com.enginemachiner.harmony
 
-/*
- TODO: Check how to change the nbt display properly (stack custom name).
- TODO: Register NBT client to server networking here. Remember, slot, blockPos if block, uuid if non player entity.
- TODO: Should there be a close screen registered receiver or screen updater?
-*/
+import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NbtCompound
 
 const val TICKS_PER_SECOND = 20
 
@@ -18,26 +15,12 @@ open class Mod( val name: String ) {
 
     }
 
-    /** @see Chat */
-    val chat = Chat(this)
-
     /**@see Debug */
-    val debug = Debug(this)
+    open val debug = Debug(this)
 
-    /** @see File */
-    open val file = File(this)
+    fun nbt( nbt: NbtCompound ) = nbt.getCompound(name)!!
 
-    /** @see Identifiers */
-    open val identifiers = Identifiers(this)
-
-    /** @see ModAdvancement */
-    open val advancement = ModAdvancement(this)
-
-    /** @see ServerNetworking */
-    val networkingManager = ServerNetworking(this)
-
-    open val itemGroup = itemGroup()
-    open val translation = Translation(name)
+    fun nbt( itemStack: ItemStack ) = nbt( itemStack.nbt!! )
 
     private companion object {
 

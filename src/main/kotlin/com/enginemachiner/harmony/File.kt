@@ -45,7 +45,7 @@ fun envPath( path: String ): String {
 }
 
 /**
- * Provides secure file access within a mod's directory.
+ * Provides secure file access within the mod's directory.
  * Prevents path traversal attacks by validating paths stay within the mod directory.
  */
 class SecureFileAccessor( mod: Mod, userPath: String ) {
@@ -68,7 +68,7 @@ class SecureFileAccessor( mod: Mod, userPath: String ) {
 }
 
 /**
- * Manages configuration files for a mod.
+ * Manages configuration files for the mod.
  * Handles loading, saving, and creating config files with default values.
  */
 class ConfigManager( mod: Mod ) {
@@ -132,7 +132,7 @@ class ConfigManager( mod: Mod ) {
 
 }
 
-/** Provides file and configuration management utilities for a mod. */
+/** Provides file and configuration management utilities for the mod. */
 class File( private val mod: Mod ) {
 
     /**

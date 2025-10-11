@@ -26,6 +26,9 @@
 
     },
 
-    "mixins": ["harmony.mixins.json"]
+    "mixins": ["harmony.mixins.json"],
 
-}
+    "entrypoints": { "main": ["com.enginemachiner.harmony.Initializer"] }
+
+
+},

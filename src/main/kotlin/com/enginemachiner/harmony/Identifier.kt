@@ -17,17 +17,3 @@ fun Mod.id( path: String ) = Identifier( id, path )
  * @return An Identifier in the format "modid:textures/path".
  */
 fun Mod.textureID( path: String ) = id( "textures/$path" )
-
-/** Common identifiers used by a mod. */
-class Identifiers( mod: Mod ) {
-
-    val itemGroup = mod.id("item_group")
-
-    companion object {
-
-        /** Identifier for the update stack NBT packet. */
-        val UPDATE_STACK_NBT = Identifier( "harmony", "update_stack_nbt" )
-
-    }
-
-}
