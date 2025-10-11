@@ -31,4 +31,4 @@
     "entrypoints": { "main": ["com.enginemachiner.harmony.Initializer"] }
 
 
-},
+}
