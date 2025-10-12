@@ -10,6 +10,7 @@
 	"authors": ["Engine_Machiner"],
 
 	"contact": {
+        "homepage": "https://modrinth.com/mod/harmonylib",
 		"issues": "https://github.com/EngineMachiner/Harmony/issues",
 		"sources": "https://github.com/EngineMachiner/Harmony"
 	},
@@ -26,9 +27,7 @@
 
     },
 
-    "mixins": ["harmony.mixins.json"],
-
-    "entrypoints": { "main": ["com.enginemachiner.harmony.Initializer"] }
-
+    "entrypoints": { "main": ["com.enginemachiner.harmony.Initializer"] },
+    "mixins": ["harmony.mixins.json"]
 
 }
