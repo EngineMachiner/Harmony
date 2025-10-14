@@ -45,7 +45,7 @@ object Harmony : Mod("Harmony") {
 
 }
 
-class Initializer : ModInitializer {
+class ModInitializer : ModInitializer {
 
     override fun onInitialize() {
 

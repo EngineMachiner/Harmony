@@ -36,24 +36,9 @@ class Register( private val mod: Mod ) {
 
     }
 
-    /** Contains a registered block and its corresponding item. */
-    data class RegisteredBlock( val block: Block, val item: Item )
+    fun block( name: String, block: Block ): Block {
 
-    /**
-     * Registers a block and its corresponding block item.
-     *
-     * @param name The block's registry name.
-     * @param block The block to register.
-     * @param settings The item settings for the block item.
-     * @return A RegisteredBlock containing both the block and item.
-     */
-    fun block( name: String, block: Block, settings: Item.Settings ): RegisteredBlock {
-
-        val id = id(name);            val block = register( BLOCK, id, block )
-
-        val item = BlockItem( block, settings );            register( ITEM, id, item )
-
-        return RegisteredBlock( block, item )
+        val id = id(name);            return register( BLOCK, id, block )
 
     }
 

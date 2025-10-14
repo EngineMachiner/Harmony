@@ -27,7 +27,7 @@
 
     },
 
-    "entrypoints": { "main": ["com.enginemachiner.harmony.Initializer"] },
+    "entrypoints": { "main": ["com.enginemachiner.harmony.ModInitializer"] },
     "mixins": ["harmony.mixins.json"]
 
 }

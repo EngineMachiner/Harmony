@@ -21,7 +21,7 @@ open class Mod( val name: String ) {
     /**@see Translation */
     open val translation = Translation(name)
 
-    fun nbt( nbt: NbtCompound ) = nbt.getCompound(name)!!
+    fun nbt( nbt: NbtCompound ): NbtCompound = nbt.getCompound(name)
 
     fun nbt( itemStack: ItemStack ) = nbt( itemStack.nbt!! )
 
